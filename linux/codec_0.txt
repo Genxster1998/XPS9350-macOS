@@ -2,7 +2,7 @@ Codec: Realtek ALC3246
 Address: 0
 AFG Function Id: 0x1 (unsol 1)
 Vendor Id: 0x10ec0256
-Subsystem Id: 0x1028082a
+Subsystem Id: 0x10280704
 Revision Id: 0x100002
 No Modem Function Group found
 Default PCM:
@@ -22,7 +22,7 @@ Node 0x02 [Audio Output] wcaps 0x41d: Stereo Amp-Out
   Control: name="Speaker Playback Volume", index=0, device=0
     ControlAmp: chs=3, dir=Out, idx=0, ofs=0
   Amp-Out caps: ofs=0x57, nsteps=0x57, stepsize=0x02, mute=0
-  Amp-Out vals:  [0x3d 0x3d]
+  Amp-Out vals:  [0x3a 0x3a]
   Converter: stream=1, channel=0
   PCM:
     rates [0x60]: 44100 48000
@@ -76,7 +76,7 @@ Node 0x08 [Audio Input] wcaps 0x10051b: Stereo Amp-In
     ControlAmp: chs=3, dir=In, idx=0, ofs=0
   Device: name="ALC3246 Analog", type="Audio", device=0
   Amp-In caps: ofs=0x17, nsteps=0x3f, stepsize=0x02, mute=1
-  Amp-In vals:  [0x27 0x27]
+  Amp-In vals:  [0x00 0x05]
   Converter: stream=1, channel=0
   SDI-Select: 0
   PCM:
@@ -125,10 +125,9 @@ Node 0x13 [Pin Complex] wcaps 0x40040b: Stereo Amp-In
   Amp-In caps: ofs=0x00, nsteps=0x03, stepsize=0x27, mute=0
   Amp-In vals:  [0x00 0x00]
   Pincap 0x00000020: IN
-  Pin Default 0x411111f0: [N/A] Speaker at Ext Rear
-    Conn = 1/8, Color = Black
+  Pin Default 0x400000f0: [N/A] Line Out at Ext N/A
+    Conn = Unknown, Color = Unknown
     DefAssociation = 0xf, Sequence = 0x0
-    Misc = NO_PRESENCE
   Pin-ctls: 0x00:
   Power states:  D0 D1 D2 D3 EPSS
   Power: setting=D3, actual=D3
@@ -136,17 +135,17 @@ Node 0x14 [Pin Complex] wcaps 0x40058d: Stereo Amp-Out
   Control: name="Speaker Playback Switch", index=0, device=0
     ControlAmp: chs=3, dir=Out, idx=0, ofs=0
   Amp-Out caps: ofs=0x00, nsteps=0x00, stepsize=0x00, mute=1
-  Amp-Out vals:  [0x80 0x80]
+  Amp-Out vals:  [0x00 0x00]
   Pincap 0x00010014: OUT EAPD Detect
   EAPD 0x2: EAPD
   Pin Default 0x90170120: [Fixed] Speaker at Int N/A
     Conn = Analog, Color = Unknown
     DefAssociation = 0x2, Sequence = 0x0
     Misc = NO_PRESENCE
-  Pin-ctls: 0x40: OUT
+  Pin-ctls: 0x00:
   Unsolicited: tag=00, enabled=0
   Power states:  D0 D1 D2 D3 EPSS
-  Power: setting=D0, actual=D0
+  Power: setting=D3, actual=D3
   Connection: 1
      0x02
 Node 0x15 [Vendor Defined Widget] wcaps 0xf00000: Mono
@@ -250,7 +249,7 @@ Node 0x21 [Pin Complex] wcaps 0x40058d: Stereo Amp-Out
   Pin-ctls: 0xc0: OUT HP
   Unsolicited: tag=01, enabled=1
   Power states:  D0 D1 D2 D3 EPSS
-  Power: setting=D3, actual=D3
+  Power: setting=D0, actual=D0
   Connection: 2
      0x02 0x03*
 Node 0x22 [Audio Mixer] wcaps 0x20010b: Stereo Amp-In

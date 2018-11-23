@@ -21,7 +21,12 @@ DefinitionBlock("", "SSDT", 2, "hack", "HDEF", 0)
         If (!Arg2) { Return (Buffer() { 0x03 } ) }
         Local0 = Package()
         {
-            "layout-id", Buffer(4) { 3, 0, 0, 0 },
+            "AAPL,slot-name", "Built In", 
+            "name", "Realtek Audio Controller", 
+            "model", Buffer () {"Realtek ALC3246 Audio Controller"}, 
+            "device_type", Buffer () {"Audio Controller"}, 
+            "layout-id", Buffer (4) { 0x0D, 0x00, 0x00, 0x00 },
+            "MaximumBootBeepVolume", Buffer () { 0x01 }, 
             "built-in", Buffer() { 0x00 },
             "hda-gfx", Buffer() { "onboard-1" },
             "RM,device-id", Buffer(4) { 0x70, 0x9d, 0x00, 0x00 },

@@ -1,4 +1,4 @@
-Dell XPS 13 96360 - Realtek ALC-256
+Dell XPS 13 9350 - Realtek ALC-256
 
 ### Codec
 
