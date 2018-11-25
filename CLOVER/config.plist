@@ -239,6 +239,20 @@
 				</dict>
 				<dict>
 					<key>Comment</key>
+					<string>Change H_EC to EC</string>
+					<key>Disabled</key>
+					<true/>
+					<key>Find</key>
+					<data>
+					SF9FQw==
+					</data>
+					<key>Replace</key>
+					<data>
+					RUNfXw==
+					</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
 					<string>change Method(_PTS,1,N) to ZPTS, pair with SSDT-PTSWAK.aml</string>
 					<key>Disabled</key>
 					<false/>
@@ -323,7 +337,7 @@
 					<key>Comment</key>
 					<string>PBTN -&gt; PWRB (power button)</string>
 					<key>Disabled</key>
-					<true/>
+					<false/>
 					<key>Find</key>
 					<data>
 					UEJUTg==
@@ -331,6 +345,20 @@
 					<key>Replace</key>
 					<data>
 					UFdSQg==
+					</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>SBTN -&gt; SLPB</string>
+					<key>Disabled</key>
+					<false/>
+					<key>Find</key>
+					<data>
+					U0JUTg==
+					</data>
+					<key>Replace</key>
+					<data>
+					U0xQQg==
 					</data>
 				</dict>
 				<dict>
@@ -363,6 +391,20 @@
 					<key>Replace</key>
 					<data>
 					j0JVRjAL+AFNU0xOcABNU0xO
+					</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>_E42 -&gt; XE42 pair SSDT-XE42.aml</string>
+					<key>Disabled</key>
+					<true/>
+					<key>Find</key>
+					<data>
+					X0dQRV9FNDI=
+					</data>
+					<key>Replace</key>
+					<data>
+					X0dQRVhFNDI=
 					</data>
 				</dict>
 			</array>
@@ -423,13 +465,13 @@
 			<string>SSDT-XOSI.aml</string>
 			<string>SSDT-Config.aml</string>
 			<string>SSDT-IGPU.aml</string>
+			<string>SSDT-XE42.aml</string>
 			<string>SSDT-PNLF.aml</string>
 			<string>SSDT-BRT6.aml</string>
 			<string>SSDT-ALS0.aml</string>
 			<string>SSDT-HDEF.aml</string>
 			<string>SSDT-ALC256.aml</string>
-			<string>SSDT-UIAC.aml</string>
-			<string>SSDT-USBX.aml</string>
+			<string>SSDT-XHC.aml</string>
 			<string>SSDT-PTSWAK.aml</string>
 			<string>SSDT-PRW.aml</string>
 			<string>SSDT-NVME.aml</string>
@@ -438,18 +480,18 @@
 			<string>SSDT-MEM2.aml</string>
 			<string>SSDT-PMCR.aml</string>
 			<string>SSDT-I2C.aml</string>
-			<string>SSDT-TYPC.aml</string>
 			<string>SSDT-LPC.aml</string>
 			<string>SSDT-SMCD.aml</string>
 			<string>SSDT-BATT.aml</string>
 			<string>SSDT-PXSX2ARPT.aml</string>
 			<string>SSDT-CpuFriend.aml</string>
+			<string>SSDT-PWRB.aml</string>
 		</array>
 	</dict>
 	<key>Boot</key>
 	<dict>
 		<key>Arguments</key>
-		<string>-cdfon acpi_layer=0x08 darkwake=0 debug=0x12a acpi_level=0x02 msgbuf=512000</string>
+		<string>-cdfon debug=0x12a darkwake=0 acpi_layer=0x08 brcmfx-country=#a msgbuf=512000 acpi_level=0x02</string>
 		<key>DefaultVolume</key>
 		<string>macOS</string>
 		<key>NeverHibernate</key>
@@ -545,6 +587,39 @@
 		<false/>
 		<key>KernelPm</key>
 		<false/>
+		<key>KernelToPatch</key>
+		<array>
+			<dict>
+				<key>Comment</key>
+				<string>MSR 0xE2 _xcpm_idle instant reboot (c) Pike R. Alpha</string>
+				<key>Disabled</key>
+				<false/>
+				<key>Find</key>
+				<data>
+				ILniAAAADzA=
+				</data>
+				<key>Replace</key>
+				<data>
+				ILniAAAAkJA=
+				</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Disable panic kext logging on 10.14 release kernel (credit Vandroiy)</string>
+				<key>Disabled</key>
+				<false/>
+				<key>Find</key>
+				<data>
+				igKEwHRC
+				</data>
+				<key>MatchOS</key>
+				<string>10.14.x</string>
+				<key>Replace</key>
+				<data>
+				igKEwOtC
+				</data>
+			</dict>
+		</array>
 		<key>KernelXCPM</key>
 		<false/>
 		<key>KextsToPatch</key>

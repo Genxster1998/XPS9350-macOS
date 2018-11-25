@@ -19,7 +19,6 @@ This repository contains a sample configuration to run macOS (Currently Mojave S
 
 - Firmware Revisions
   - BIOS version `1.9.0`
-  - Thunderbolt Controller firmware version `NVM 26`
 
 - External Devices
   - [Dell WD15 USB-C Dock](https://www.dell.com/support/article/us/en/04/sln304627/dell-dock-wd15-usb-type-c-information-compatibility-and-specifications)
@@ -28,7 +27,7 @@ This repository contains a sample configuration to run macOS (Currently Mojave S
 
 ## Preparation
 
-This repository has been tested against Dell XP 9350 bios version `1.9.0` with Thunderbolt firmware `NVM 26.1`. For best results ensure this is the bios version of the target machine.
+This repository has been tested against Dell XP 9350 bios version `1.9.0`. For best results ensure this is the bios version of the target machine.
 
 ## UEFI Variables
 
@@ -51,10 +50,19 @@ If required the script `--compile-dsdt` option can be used to compile any change
 
 ## AppleHDA
 
-In order to support the Realtek ALC256 (ALC3246) codec of the Dell XPS 9360, AppleALC is included with layout-id `13`.
+In order to support the Realtek ALC256 (ALC3246) codec of the Dell XPS 9350, AppleALC is included with layout-id `13`.
 
 Alternatively, a custom AppleHDA injector can be used.
 The script option `--patch-hda` option generates an AppleHDA_ALC256.kext injector and installs it in `/Library/Extensions`.
+
+For combo jack support and startup/wakeup fix run `kexts/ComboJack_Installer/install.sh`
+
+## USB
+
+If usb disks get ejected upon sleep/wake, run `kexts/syscl-USBFix/install.sh` to install a daemon that safely unmount usb disks before sleep and remount after wake.
+
+Type-c hotplug works, but when you want to wake up the laptop, detach type-c device first, or the type-c port will become invalid, in this case you will have to sleep/wake again to bring type-c back.
+
 
 ## Display Profiles
 
@@ -66,7 +74,7 @@ Profiles are configured on a per display basis in the `System Preferences` -> `D
 
 ## CPU Profile
 
-In order for macOS to effectively manage the power profile of the i7-8550U processor in the Dell XPS 9630 model used here, it is necessary to include a powermanagement profile for `X86PlatformPlugin`.
+In order for macOS to effectively manage the power profile of the i7-6560U processor in the Dell XPS 9350 model used here, it is necessary to include a powermanagement profile for `X86PlatformPlugin`.
 
 A pre-built `CPUFriend.kext` and `SSDT-CpuFriend.aml` is included in the `kext` folder for the i7-6560U.
 
@@ -76,13 +84,18 @@ https://github.com/PMheart/CPUFriend/blob/master/Instructions.md
 
 ## Undervolting
 
-**Warning [undervolting](https://en.wikipedia.org/wiki/Dynamic_voltage_scaling) may render your XPS 9360 unusable**
+**Warning: [undervolting](https://en.wikipedia.org/wiki/Dynamic_voltage_scaling) may render your XPS 9350 unusable.**
 
-Essentially it allows your processor to run on a lower voltage than its specifications, reducing the core temperature.
+**Ensure that the variable offset is correct for your current bios.**
+
+* Dump your bios with [Fptw64](https://overclocking.guide/download/flash-programming-tool/): `fptw64.exe -d bios.bin -bios`
+* Open dumped bios with [UEFITool](https://github.com/LongSoft/UEFITool), search for "BIOS LOCK" and you will find the section for bios settings, extract the section, let's say the extracted file is `Section_PE32_image_Setup_Setup.sct`
+* Open `Section_PE32_image_Setup_Setup.sct` with [Universal IFR Extractor](https://github.com/donovan6000/Universal-IFR-Extractor) and click extract, there will be a file named `Section_PE32_image_Setup_Setup IFR.txt`
+* Open `Section_PE32_image_Setup_Setup IFR.txt` and you will see all the hidden settings.
+
+Essentially undervolting allows your processor to run on a lower voltage than its specifications, reducing the core temperature.
 
 This allows longer battery life and longer turbo boost.
-
-Credits for this go to jkbuha at tonymacx86.
 
 The undervolt settings I use are configured in UEFI, with the following settings:
 
@@ -96,13 +109,14 @@ The undervolt settings I use are configured in UEFI, with the following settings
   `0x502` -> `0x1E` (GPU: -30 mV)  
   `0x504` -> `01`   (Negative voltage for `0x85A`)
 
-Remember, these values work for my specific machine, but might cause any other laptop to fail to boot!
+Remember, these values work for my specific machine, but might cause any other laptop to fail to boot! **Test with Intel XTU or ThrottleStop first!**
 
 ## HiDPI
 For a fhd display, use [one-key-hidpi](https://github.com/xzhih/one-key-hidpi)
 
 ## Credits
 
+- [XPS 13 9350 setup by syscl](https://github.com/syscl/XPS9350-macOS)
 - [OS-X-Clover-Laptop-Config (Hot-patching)](https://github.com/RehabMan/OS-X-Clover-Laptop-Config)
 - [Dell XPS 13 9360 Guide by bozma88](https://www.tonymacx86.com/threads/guide-dell-xps-13-9360-on-macos-sierra-10-12-x-lts-long-term-support-guide.213141/)
 - [VoodooI2C on XPS 13 9630 by Vygr10565](https://www.tonymacx86.com/threads/guide-dell-xps-13-9360-on-macos-sierra-10-12-x-lts-long-term-support-guide.213141/page-202#post-1708487)
