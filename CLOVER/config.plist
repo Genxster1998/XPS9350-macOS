@@ -369,6 +369,8 @@
 			<key>ReuseFFFF</key>
 			<false/>
 		</dict>
+		<key>DisableASPM</key>
+		<true/>
 		<key>DropTables</key>
 		<array>
 			<dict>
@@ -394,6 +396,10 @@
 		</array>
 		<key>FixHeaders</key>
 		<true/>
+		<key>ResetAddress</key>
+		<string>0xB2</string>
+		<key>ResetValue</key>
+		<string>0x73</string>
 		<key>SSDT</key>
 		<dict>
 			<key>DropOem</key>
@@ -443,7 +449,7 @@
 	<key>Boot</key>
 	<dict>
 		<key>Arguments</key>
-		<string>acpi_level=0x02 msgbuf=512000 darkwake=0 debug=0x12a -cdfon acpi_layer=0x08</string>
+		<string>-cdfon acpi_layer=0x08 darkwake=0 debug=0x12a acpi_level=0x02 msgbuf=512000</string>
 		<key>DefaultVolume</key>
 		<string>macOS</string>
 		<key>NeverHibernate</key>
