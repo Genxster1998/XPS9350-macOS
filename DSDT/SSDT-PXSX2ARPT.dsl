@@ -7,6 +7,22 @@ DefinitionBlock ("", "SSDT", 1, "syscl", "ARPT", 0x00003000)
 
     Scope (\_SB.PCI0.RP05)
     {
+        Method (_DSM, 4, NotSerialized)
+        {
+	        If (LEqual (Arg2, Zero))
+	        {
+		        Return (Buffer (One){0x03})
+	        }
+	        Return (Package (0x02)
+	        {
+	        	"reg-ltrovr", 
+	        	Buffer (0x08)
+	        	{
+		        	0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+		        }
+	        })
+        }
+        
         Scope (PXSX)
         {
             Name (_STA, Zero)  // _STA: Status

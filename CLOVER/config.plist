@@ -465,6 +465,7 @@
 			<string>SSDT-XOSI.aml</string>
 			<string>SSDT-Config.aml</string>
 			<string>SSDT-IGPU.aml</string>
+			<string>SSDT-DSM.aml</string>
 			<string>SSDT-XE42.aml</string>
 			<string>SSDT-PNLF.aml</string>
 			<string>SSDT-BRT6.aml</string>

@@ -318,6 +318,22 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
         {
             \_SB.TBFP (Zero)
         }
+        
+        Method (_DSM, 4, NotSerialized)
+        {
+	        If (LEqual (Arg2, Zero))
+	        {
+		        Return (Buffer (One){0x03})
+	        }
+	        Return (Package (0x02)
+	        {
+	        	"reg-ltrovr", 
+	        	Buffer (0x08)
+	        	{
+		        	0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+		        }
+	        })
+        }
     }
 
     Scope (_SB.PCI0.RP01.PXSX)
