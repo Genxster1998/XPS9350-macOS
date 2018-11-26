@@ -27,17 +27,19 @@ DefinitionBlock("", "SSDT", 2, "hack", "BRT6", 0)
             If (LEqual (Arg0, One))
             {
                 Notify (^LCD, 0x86)    //native code
-                Notify (^^LPCB.PS2K, 0x10)    //ELAN code
-                Notify (^^LPCB.PS2K, 0x0206) // PS2 code
-                Notify (^^LPCB.PS2K, 0x0286) // PS2 code
+                //Notify (^^LPCB.PS2K, 0x10)    //ELAN code
+                //Notify (^^LPCB.PS2K, 0x0206) // PS2 code
+                //Notify (^^LPCB.PS2K, 0x0286) // PS2 code
+                Notify (^^LPCB.PS2K, 0x0406)
             }
 
             If (And (Arg0, 0x02))
             {
                 Notify (^LCD, 0x87)    //native code
-                Notify (^^LPCB.PS2K, 0x20)    //ELAN code
-                Notify (^^LPCB.PS2K, 0x0205) // PS2 code
-                Notify (^^LPCB.PS2K, 0x0285) // PS2 code
+                //Notify (^^LPCB.PS2K, 0x20)    //ELAN code
+                //Notify (^^LPCB.PS2K, 0x0205) // PS2 code
+                //Notify (^^LPCB.PS2K, 0x0285) // PS2 code
+                Notify (^^LPCB.PS2K, 0x0405)
             }
         }
     }
