@@ -7,15 +7,16 @@ This repository contains a sample configuration to run macOS (Currently Mojave S
 - Dell XPS 9350
   - Intel i7-6560U
   - 8GB RAM
-  - Sharp `SHP144` `LQ133Z1` QHD+ (3200x1800) Touchscreen display
+  - Sharp `SHP144` `LQ133Z1` QHD+ (3200x1800) Touchscreen display, working multitouch gesture with VoodooI2C
   - [PLEXTOR 512GB SSD](http://www.goplextor.com/Product/Detail/M6G-2280) (PLEXTOR PX-512M6G-2280) on latest firmware
     - Formatted for APFS with 4K sectors, using [nvme-cli](https://github.com/linux-nvme/nvme-cli) using this [guide](https://www.tonymacx86.com/threads/guide-sierra-on-hp-spectre-x360-native-kaby-lake-support.228302/)
   - Dell DW1830 Wireless (Taobao)
     - Wi-Fi device ID [`14e4:43ba`], shows as Apple Airport Extreme
     - Bluetooth device ID [`0a5c:6410`], chipset `20703A1` with firmware `v5 c4518` using `BrcmPatchRAM2.kext`
+    - DW1830 has three ipex4 connectors, but xps 13 only has two antennas. In this case you should connect j0+j1 or j1+j2, because j1 is the antenna for both wlan and bluetooth.
   - Webcam, device ID [`05ac:8600`], works out of the box
   - Disabled devices
-    - SD card reader, [macOS open-source project](https://github.com/syscl/Sinetek-rtsx)
+    - SD card reader (RTS525A), [macOS open-source project](https://github.com/syscl/Sinetek-rtsx)
 
 - Firmware Revisions
   - BIOS version `1.9.0`
@@ -31,17 +32,25 @@ This repository has been tested against Dell XP 9350 bios version `1.9.0`. For b
 
 ## UEFI Variables
 
-In order to run macOS successfully a number of EFI BIOS variables need to be modified. The included Clover bootloader contains an updated `DVMT.efi`, which includes a `setup_var` command to help do just that.
+[Ensure that the variable offset is correct for your current bios.](#dumpguide)
+
+**If your cpu is not i7 6560U**, in order to run macOS successfully, a number of EFI BIOS variables need to be modified. The included Clover bootloader contains an updated `DVMT.efi`, which includes a `setup_var` command to help do just that.
 
 `DVMT.efi` can be launched from Clover directly by renaming it to `Shell64U.efi` in the `tools` folder.
 
-The following variables need to be updated:
+The following variables need to be updated **If your cpu is not i7 6560U**:
+
+| Variable              | Offset | Default value  | Desired value   | Comment                                                    |
+|-----------------------|--------|----------------|-----------------|------------------------------------------------------------|
+| DVMT Pre-allocation   | 0x432  | 0x01 (32M)     | 0x06 (192M)     | Increase DVMT pre-allocated size to 192M for QHD+ displays |
+| DVMT Total Gfx Memory | 0x433  | 0x01 (128M)    | 0x03 (MAX)      | Increase total gfx memory limit to maximum                 |
+
+
+Whether to modify the following variables is up to you, I personally modified it in case the `MSR 0xE2 _xcpm_idle kernel patch` is not updated for new mac os release.
 
 | Variable              | Offset | Default value  | Desired value   | Comment                                                    |
 |-----------------------|--------|----------------|-----------------|------------------------------------------------------------|
 | CFG Lock              | 0x109  | 0x01 (Enabled) | 0x00 (Disabled) | Disable CFG Lock to prevent MSR 0x02 errors on boot        |
-| DVMT Pre-allocation   | 0x432  | 0x01 (32M)     | 0x06 (192M)     | Increase DVMT pre-allocated size to 192M for QHD+ displays |
-| DVMT Total Gfx Memory | 0x433  | 0x01 (128M)    | 0x03 (MAX)      | Increase total gfx memory limit to maximum                 |
 
 ## Clover Configuration
 
@@ -76,7 +85,11 @@ Profiles are configured on a per display basis in the `System Preferences` -> `D
 
 In order for macOS to effectively manage the power profile of the i7-6560U processor in the Dell XPS 9350 model used here, it is necessary to include a powermanagement profile for `X86PlatformPlugin`.
 
-A pre-built `CPUFriend.kext` and `SSDT-CpuFriend.aml` is included in the `kext` folder for the i7-6560U.
+There are three approaches to CPU power management:
+
+* Put `kexts/cpupm/CPUFriend.kext` in `Clover/kexts/Other`, put `kexts/cpupm/SSDT-CpuFriend.aml` in `Clover/ACPI/patched`.
+* Put `kexts/cpupm/CPUFriend.kext` and `kexts/cpupm/CPUFriendDataProvider.kext` in `Clover/kexts/Other`.
+* Install `kexts/cpupm/X86PlatformPluginInjector.kext` to `/Library/Extensions`.
 
 Instructions on how to build a power mangaement profile for any other CPU types can be found here:
 
@@ -86,7 +99,7 @@ https://github.com/PMheart/CPUFriend/blob/master/Instructions.md
 
 **Warning: [undervolting](https://en.wikipedia.org/wiki/Dynamic_voltage_scaling) may render your XPS 9350 unusable.**
 
-**Ensure that the variable offset is correct for your current bios.**
+**Ensure that the variable offset is correct for your current bios.**<a name="dumpguide"></a>
 
 * Dump your bios with [Fptw64](https://overclocking.guide/download/flash-programming-tool/): `fptw64.exe -d bios.bin -bios`
 * Open dumped bios with [UEFITool](https://github.com/LongSoft/UEFITool), search for "BIOS LOCK" and you will find the section for bios settings, extract the section, let's say the extracted file is `Section_PE32_image_Setup_Setup.sct`
@@ -105,9 +118,9 @@ The undervolt settings I use are configured in UEFI, with the following settings
 
 - Undervolt values:  
   `0x42` -> `0x64` (CPU: -100 mV)  
-  `0x44` -> `01`   (Negative voltage for `0x653`)  
+  `0x44` -> `01`   (Negative voltage for `0x42`)  
   `0x502` -> `0x1E` (GPU: -30 mV)  
-  `0x504` -> `01`   (Negative voltage for `0x85A`)
+  `0x504` -> `01`   (Negative voltage for `0x502`)
 
 Remember, these values work for my specific machine, but might cause any other laptop to fail to boot! **Test with Intel XTU or ThrottleStop first!**
 
