@@ -47,7 +47,7 @@
 				<key>FixHDA</key>
 				<false/>
 				<key>FixHPET</key>
-				<true/>
+				<false/>
 				<key>FixIDE</key>
 				<false/>
 				<key>FixIPIC</key>
@@ -193,20 +193,6 @@
 				</dict>
 				<dict>
 					<key>Comment</key>
-					<string>change Method(GPRW,2,N) to XPRW, pair with SSDT-PRW.aml</string>
-					<key>Disabled</key>
-					<true/>
-					<key>Find</key>
-					<data>
-					R1BSVwI=
-					</data>
-					<key>Replace</key>
-					<data>
-					WFBSVwI=
-					</data>
-				</dict>
-				<dict>
-					<key>Comment</key>
 					<string>_PRW -&amp;gt; XPRW pair SSDT-ARPT-RP05</string>
 					<key>Disabled</key>
 					<false/>
@@ -221,6 +207,20 @@
 					<key>TgtBridge</key>
 					<data>
 					UlAwNQ==
+					</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>change Method(GPRW,2,N) to XPRW, pair with SSDT-PRW.aml</string>
+					<key>Disabled</key>
+					<false/>
+					<key>Find</key>
+					<data>
+					R1BSVwI=
+					</data>
+					<key>Replace</key>
+					<data>
+					WFBSVwI=
 					</data>
 				</dict>
 				<dict>

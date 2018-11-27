@@ -31,11 +31,12 @@ DefinitionBlock ("", "SSDT", 1, "syscl", "ARPT", 0x00003000)
         Device (ARPT)
         {
             Name (_ADR, Zero)  // _ADR: Address
+            /*
             Name (_PRW, Package (0x02)  // _PRW: Power Resources for Wake
             {
                 0x09, 
                 0x04
-            })
+            })*/
             Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
             {
                 If (LEqual (Arg2, Zero))
