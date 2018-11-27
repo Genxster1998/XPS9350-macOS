@@ -34,7 +34,7 @@ This repository has been tested against Dell XP 9350 bios version `1.9.0`. For b
 
 [Ensure that the variable offset is correct for your current bios.](#dumpguide)
 
-**If your cpu is not i7 6560U**, in order to run macOS successfully, a number of EFI BIOS variables need to be modified. The included Clover bootloader contains an updated `DVMT.efi`, which includes a `setup_var` command to help do just that.
+**If your cpu is not i7 6560U (which means you have Intel HD Graphics instead of Intel Iris Graphics)**, in order to run macOS successfully, some EFI BIOS variables need to be modified. The included Clover bootloader contains an updated `DVMT.efi`, which includes a `setup_var` command to help do just that.
 
 `DVMT.efi` can be launched from Clover directly by renaming it to `Shell64U.efi` in the `tools` folder.
 
@@ -68,9 +68,9 @@ For combo jack support and startup/wakeup fix run `kexts/ComboJack_Installer/ins
 
 ## USB
 
-If usb disks get ejected upon sleep/wake, run `kexts/syscl-USBFix/install.sh` to install a daemon that safely unmount usb disks before sleep and remount after wake.
+It is a known bug that usb disks get ejected unexpectedly upon sleep/wake. Run `kexts/syscl-USBFix/install.sh` to install a daemon that safely unmount usb disks before sleep and remount after wake.
 
-Type-c hotplug works, but when you want to wake up the laptop, detach type-c device first, or the type-c port will become invalid, in this case you will have to sleep/wake again to bring type-c back.
+Type-c hotplug works, but when you want to put the laptop asleep/awake, detach type-c device, or the type-c port will become invalid.
 
 
 ## Display Profiles
@@ -130,6 +130,7 @@ For a fhd display, use [one-key-hidpi](https://github.com/xzhih/one-key-hidpi)
 ## Credits
 
 - [XPS 13 9350 setup by syscl](https://github.com/syscl/XPS9350-macOS)
+- [XPS 13 9356 setup by the-darkvoid](https://github.com/the-darkvoid/XPS9360-macOS)
 - [OS-X-Clover-Laptop-Config (Hot-patching)](https://github.com/RehabMan/OS-X-Clover-Laptop-Config)
 - [Dell XPS 13 9360 Guide by bozma88](https://www.tonymacx86.com/threads/guide-dell-xps-13-9360-on-macos-sierra-10-12-x-lts-long-term-support-guide.213141/)
 - [VoodooI2C on XPS 13 9630 by Vygr10565](https://www.tonymacx86.com/threads/guide-dell-xps-13-9360-on-macos-sierra-10-12-x-lts-long-term-support-guide.213141/page-202#post-1708487)
