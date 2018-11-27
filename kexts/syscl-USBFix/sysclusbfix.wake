@@ -5,7 +5,7 @@
 
 gMountPartition="/tmp/com.syscl.externalfix"
 
-cat ${gMountPartition} |xargs -I {} diskutil mount {}
+cat ${gMountPartition} 2>/dev/null | xargs -I {} diskutil mount {}
 rm ${gMountPartition}
 
 #
@@ -13,9 +13,9 @@ rm ${gMountPartition}
 #
 
 gRTWlan_kext=
-gMAC_adr=$(ioreg -rc $gRTWlan_kext | sed -n "/IOMACAddress/ s/.*= <\(.*\)>.*/\1/ p")
+gMAC_adr=$(ioreg -rc $gRTWlan_kext 2>/dev/null | sed -n "/IOMACAddress/ s/.*= <\(.*\)>.*/\1/ p")
 
-if [[ "$gMAC_adr" != 0 ]];
+if [[ "$gMAC_adr" != 0 && "$gMAC_adr" != "" ]];
   then
     gRT_Config="/Applications/Wireless Network Utility.app"/${gMAC_adr}rfoff.rtl
 

@@ -11,8 +11,13 @@
 #
 # Added unmount Disk for "OS X" (c) syscl/lighting/Yating Zhou.
 #
+
+export LANG=C
+
 gMountPartition="/tmp/com.syscl.externalfix"
 gDisk=($(ls /dev/disk? |grep -i -o "disk[0-9]"))
+
+true > ${gMountPartition}
 
 for ((i=0; i<${#gDisk[@]}; ++i))
 do
@@ -32,15 +37,14 @@ do
   fi
 done
 
-
 #
 # Fix RTLWlanUSB sleep problem credit B1anker & syscl/lighting/Yating Zhou. @PCBeta.
 #
 
 gRTWlan_kext=
-gMAC_adr=$(ioreg -rc $gRTWlan_kext | sed -n "/IOMACAddress/ s/.*= <\(.*\)>.*/\1/ p")
+gMAC_adr=$(ioreg -rc $gRTWlan_kext 2>/dev/null | sed -n "/IOMACAddress/ s/.*= <\(.*\)>.*/\1/ p")
 
-if [[ "$gMAC_adr" != 0 ]];
+if [[ "$gMAC_adr" != 0 && "$gMAC_adr" != "" ]];
   then
     gRT_Config="/Applications/Wireless Network Utility.app"/${gMAC_adr}rfoff.rtl
 

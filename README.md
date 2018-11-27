@@ -68,7 +68,7 @@ For combo jack support and startup/wakeup fix run `kexts/ComboJack_Installer/ins
 
 ## USB
 
-It is a known bug that usb disks get ejected unexpectedly upon sleep/wake. Run `kexts/syscl-USBFix/install.sh` to install a daemon that safely unmount usb disks before sleep and remount after wake.
+It is a known issue that usb disks ejected unexpectedly upon sleep/wake, run `kexts/syscl-USBFix/install.sh` to install a daemon that safely unmount usb disks before sleep and remount after wake.
 
 Type-c hotplug works, but when you want to put the laptop asleep/awake, detach type-c device, or the type-c port will become invalid.
 
