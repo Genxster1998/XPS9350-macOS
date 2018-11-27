@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This script aims to unmount all external devices automatically before sleep.
 #
@@ -16,6 +16,7 @@ export LANG=C
 
 gMountPartition="/tmp/com.syscl.externalfix"
 gDisk=($(ls /dev/disk? |grep -i -o "disk[0-9]"))
+gUSBDisk=""
 
 true > ${gMountPartition}
 
@@ -33,9 +34,11 @@ do
             echo ${gCurrent_Partitions[k]} >> ${gMountPartition}
         fi
       done
-      diskutil eject ${gDisk[i]}
+      #diskutil eject ${gDisk[i]}
+	  gUSBDisk="${gUSBDisk}\n${gDisk[i]}"
   fi
 done
+echo -e "${gUSBDisk}\n" | xargs -I {} diskutil eject {}
 
 #
 # Fix RTLWlanUSB sleep problem credit B1anker & syscl/lighting/Yating Zhou. @PCBeta.
