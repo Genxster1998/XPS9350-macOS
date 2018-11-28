@@ -130,9 +130,9 @@ For a fhd display, use [one-key-hidpi](https://github.com/xzhih/one-key-hidpi)
 ## Credits
 
 - [XPS 13 9350 setup by syscl](https://github.com/syscl/XPS9350-macOS)
-- [XPS 13 9356 setup by the-darkvoid](https://github.com/the-darkvoid/XPS9360-macOS)
+- [XPS 13 9360 setup by the-darkvoid](https://github.com/the-darkvoid/XPS9360-macOS)
 - [OS-X-Clover-Laptop-Config (Hot-patching)](https://github.com/RehabMan/OS-X-Clover-Laptop-Config)
 - [Dell XPS 13 9360 Guide by bozma88](https://www.tonymacx86.com/threads/guide-dell-xps-13-9360-on-macos-sierra-10-12-x-lts-long-term-support-guide.213141/)
-- [VoodooI2C on XPS 13 9630 by Vygr10565](https://www.tonymacx86.com/threads/guide-dell-xps-13-9360-on-macos-sierra-10-12-x-lts-long-term-support-guide.213141/page-202#post-1708487)
+- [VoodooI2C on XPS 13 9360 by Vygr10565](https://www.tonymacx86.com/threads/guide-dell-xps-13-9360-on-macos-sierra-10-12-x-lts-long-term-support-guide.213141/page-202#post-1708487)
 - [USB-C Hotplug through ExpressCard by dpassmor](https://www.tonymacx86.com/threads/usb-c-hotplug-questions.211313/)
 - Kext authors mentioned in [kexts/kexts.txt](https://github.com/hackintosh-stuff/XPS9360-macOS/blob/master/kexts/kexts.txt)
