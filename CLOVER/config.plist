@@ -587,7 +587,7 @@
 		<key>KernelLapic</key>
 		<false/>
 		<key>KernelPm</key>
-		<false/>
+		<true/>
 		<key>KernelToPatch</key>
 		<array>
 			<dict>
@@ -648,9 +648,9 @@
 	<key>RtVariables</key>
 	<dict>
 		<key>BooterConfig</key>
-		<string>0x28</string>
+		<string>0x2A</string>
 		<key>CsrActiveConfig</key>
-		<string>0x67</string>
+		<string>0x03</string>
 		<key>ROM</key>
 		<string>UseMacAddr0</string>
 	</dict>
