@@ -9,7 +9,7 @@ This repository contains a sample configuration to run macOS (Currently Mojave S
   - 8GB RAM
   - Sharp `SHP144` `LQ133Z1` QHD+ (3200x1800) Touchscreen display, working multitouch gesture with VoodooI2C
   - [PLEXTOR 512GB SSD](http://www.goplextor.com/Product/Detail/M6G-2280) (PLEXTOR PX-512M6G-2280) on latest firmware
-    - Formatted for APFS with 4K sectors, using [nvme-cli](https://github.com/linux-nvme/nvme-cli) using this [guide](https://www.tonymacx86.com/threads/guide-sierra-on-hp-spectre-x360-native-kaby-lake-support.228302/)
+    - To format nvme ssd for APFS with 4K sectors, use [nvme-cli](https://github.com/linux-nvme/nvme-cli) using this [guide](https://www.tonymacx86.com/threads/guide-sierra-on-hp-spectre-x360-native-kaby-lake-support.228302/)
   - Dell DW1830 Wireless (Taobao)
     - Wi-Fi device ID [`14e4:43ba`], shows as Apple Airport Extreme
     - Bluetooth device ID [`0a5c:6410`], chipset `20703A1` with firmware `v5 c4518` using `BrcmPatchRAM2.kext`
