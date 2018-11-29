@@ -1,3 +1,4 @@
+// This ssdt does not call TBFP method, so thunderbolt controller is not enabled.
 // No hotplug, XHC2 disappears when unplug and does not come back when re-plug
 // But able to eject XHC2 from expresscard tray icon (how to do this programmatically?)
 // If eject XHC2 before sleep, XHC2 will be discovered by IOPCIFamily again when wake up
