@@ -25,6 +25,8 @@
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>IORegistryExplorer</string>
+	<key>CFBundleIconFile</key>
+	<string>icon.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.apple.IORegistryExplorer</string>
 	<key>CFBundleInfoDictionaryVersion</key>
