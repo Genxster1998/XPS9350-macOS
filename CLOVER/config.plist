@@ -4,14 +4,6 @@
 <dict>
 	<key>ACPI</key>
 	<dict>
-		<key>##ResetAddress</key>
-		<string>0x0</string>
-		<key>##ResetValue</key>
-		<string>0x0</string>
-		<key>#ResetAddress</key>
-		<string>0xB2</string>
-		<key>#ResetValue</key>
-		<string>0x73</string>
 		<key>DSDT</key>
 		<dict>
 			<key>DropOEM_DSM</key>
@@ -25,7 +17,9 @@
 				<key>AddIMEI</key>
 				<true/>
 				<key>AddMCHC</key>
-				<false/>
+				<true/>
+				<key>AddPNLF</key>
+				<true/>
 				<key>DeleteUnused</key>
 				<false/>
 				<key>FakeLPC</key>
@@ -119,6 +113,20 @@
 					<key>Replace</key>
 					<data>
 					WE9TSQ==
+					</data>
+				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>0x07D0, OSYS -&gt; 0x07DF, OSYS</string>
+					<key>Disabled</key>
+					<true/>
+					<key>Find</key>
+					<data>
+					0AdPU1lT
+					</data>
+					<key>Replace</key>
+					<data>
+					3wdPU1lT
 					</data>
 				</dict>
 				<dict>
