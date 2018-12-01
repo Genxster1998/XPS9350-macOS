@@ -32,7 +32,13 @@ This repository has been tested against Dell XP 9350 bios version `1.9.0`. For b
 
 ## UEFI Variables
 
-[Ensure that the variable offset is correct for your current bios.](#dumpguide)
+<a name="dumpguide"></a>
+**Ensure that the variable offset is correct for your current bios.**
+
+* Dump your bios with [Fptw64](https://overclocking.guide/download/flash-programming-tool/): `fptw64.exe -d bios.bin -bios`
+* Open dumped bios with [UEFITool](https://github.com/LongSoft/UEFITool), search for "BIOS LOCK" and you will find the section for bios settings, extract the section, let's say the extracted file is `Section_PE32_image_Setup_Setup.sct`
+* Open `Section_PE32_image_Setup_Setup.sct` with [Universal IFR Extractor](https://github.com/donovan6000/Universal-IFR-Extractor) and click extract, there will be a file named `Section_PE32_image_Setup_Setup IFR.txt`
+* Open `Section_PE32_image_Setup_Setup IFR.txt` and you will see all the hidden settings.
 
 **If your cpu is not i7 6560U (which means you have Intel HD Graphics instead of Intel Iris Graphics)**, in order to run macOS successfully, some EFI BIOS variables need to be modified. The included Clover bootloader contains an updated `DVMT.efi`, which includes a `setup_var` command to help do just that.
 
@@ -57,29 +63,37 @@ Whether to modify the following variables is up to you, I personally modified it
 All Clover hotpatches are included in source DSL format in the DSDT folder.
 If required the script `--compile-dsdt` option can be used to compile any changes to the DSL files into `./CLOVER/ACPI/patched`.
 
-## AppleHDA
+Copy `CLOVER` folder to your EFI partition to install/boot Mac OS before you do something further.
 
-In order to support the Realtek ALC256 (ALC3246) codec of the Dell XPS 9350, AppleALC is included with layout-id `13`.
+After boot into installed Mac OS, use `tools/Clover Configurator.app` to tweak clover settings.
 
-Alternatively, a custom AppleHDA injector can be used.
-The script option `--patch-hda` option generates an AppleHDA_ALC256.kext injector and installs it in `/Library/Extensions`.
+* Generate suitable SMBIOS **(ProductName: MacBookPro13,2)** 
+* If you have QHD+ screen, in `Boot Graphics` section, set `EFILoginHiDPI` to `1` and `UIScale` to `2` for correct boot logo size.
 
-For combo jack support and startup/wakeup fix run `kexts/ComboJack_Installer/install.sh`
+## WLAN/Bluetooth
+
+Install `BrcmFirmwareRepo.kext` and `BrcmPatchRAM2.kext` to `/Library/Extensions/` to fix DW1830/DW1560 bluetooth support. (find them in `kexts/Library-Extensions/`). 
+
+`tools/KCPM Utility Pro.app` can be used to accomplish this task.
+
+## Audio
+
+In order to support the Realtek ALC256 (ALC3246) codec of the Dell XPS 9350, AppleALC is already included with layout-id `13`.
+
+<del>Alternatively, a custom AppleHDA injector can be used.
+The script option `--patch-hda` option generates an AppleHDA_ALC256.kext injector and installs it in `/Library/Extensions`</del>.(not tested)
+
+Run `kexts/ComboJack_Installer/install.sh` to install a daemon that fixes several audio issues including headset support. 
 
 ## USB
 
-It is a known issue that usb disks ejected unexpectedly upon sleep/wake, run `kexts/syscl-USBFix/install.sh` to install a daemon that safely unmount usb disks before sleep and remount after wake.
+It is a known bug that usb disks get ejected unexpectedly upon sleep/wake, run `kexts/syscl-USBFix/install.sh` to install a daemon that safely unmount usb disks before sleep and remount after wake.
 
-Type-c hotplug works, but when you want to put the laptop asleep/awake, detach type-c device, or the type-c port will become invalid.
+If you need type-c hotplug, replace `CLOVER/ACPI/patched/SSDT-XHC.aml` with `DSDT-backup/SSDT-XHC-alt/SSDT-XHC.aml`, but it has limitations: when you want to put the laptop asleep/awake, detach type-c device, or the type-c port will become invalid, even so sometimes system failed to wake up due to type-c controller (not always, can't figure out why).
 
+## Thunderbolt
 
-## Display Profiles
-
-Display profiles for the Sharp LQ133Z1 display (Dell XPS 9350 QHD+) are included in the displays folder.
-
-Profiles can be installed by copying them into `/Users/<username>/Library/ColorSync/Profiles` folder, additionally the macOS built-in `ColorSync` utility can be used to inspect the profiles.
-
-Profiles are configured on a per display basis in the `System Preferences` -> `Display` preferences menu.
+It should work, although there is probably no hotplug/sleep support.
 
 ## CPU Profile
 
@@ -91,20 +105,21 @@ There are three approaches to CPU power management:
 * Put `kexts/cpupm/CPUFriend.kext` and `kexts/cpupm/CPUFriendDataProvider.kext` in `Clover/kexts/Other`.
 * Install `kexts/cpupm/X86PlatformPluginInjector.kext` to `/Library/Extensions`.
 
-Instructions on how to build a power mangaement profile for any other CPU types can be found here:
+Instructions on how to build a power mangaement profile for any other CPU types can be found here: [CPUFriend By PMheart](https://github.com/PMheart/CPUFriend/blob/master/Instructions.md)
 
-https://github.com/PMheart/CPUFriend/blob/master/Instructions.md
+## Display Profiles
+
+Display profiles for the Sharp LQ133Z1 display (Dell XPS 9350 QHD+) are included in the displays folder.
+
+Profiles can be installed by copying them into `/Users/<username>/Library/ColorSync/Profiles` folder, additionally the macOS built-in `ColorSync` utility can be used to inspect the profiles.
+
+Profiles are configured on a per display basis in the `System Preferences` -> `Display` preferences menu.
 
 ## Undervolting
 
+[Ensure that the variable offset is correct for your current bios.](#dumpguide)
+
 **Warning: [undervolting](https://en.wikipedia.org/wiki/Dynamic_voltage_scaling) may render your XPS 9350 unusable.**
-
-**Ensure that the variable offset is correct for your current bios.**<a name="dumpguide"></a>
-
-* Dump your bios with [Fptw64](https://overclocking.guide/download/flash-programming-tool/): `fptw64.exe -d bios.bin -bios`
-* Open dumped bios with [UEFITool](https://github.com/LongSoft/UEFITool), search for "BIOS LOCK" and you will find the section for bios settings, extract the section, let's say the extracted file is `Section_PE32_image_Setup_Setup.sct`
-* Open `Section_PE32_image_Setup_Setup.sct` with [Universal IFR Extractor](https://github.com/donovan6000/Universal-IFR-Extractor) and click extract, there will be a file named `Section_PE32_image_Setup_Setup IFR.txt`
-* Open `Section_PE32_image_Setup_Setup IFR.txt` and you will see all the hidden settings.
 
 Essentially undervolting allows your processor to run on a lower voltage than its specifications, reducing the core temperature.
 
@@ -122,10 +137,10 @@ The undervolt settings I use are configured in UEFI, with the following settings
   `0x502` -> `0x1E` (GPU: -30 mV)  
   `0x504` -> `01`   (Negative voltage for `0x502`)
 
-Remember, these values work for my specific machine, but might cause any other laptop to fail to boot! **Test with Intel XTU or ThrottleStop first!**
+Remember, these values work for my specific machine, but might cause any other laptop to fail to boot! **You should find out the suitable voltage offset for your laptop with Intel XTU or ThrottleStop first!**
 
 ## HiDPI
-For a fhd display, use [one-key-hidpi](https://github.com/xzhih/one-key-hidpi)
+For a FHD display, use [one-key-hidpi](https://github.com/xzhih/one-key-hidpi)
 
 ## Credits
 

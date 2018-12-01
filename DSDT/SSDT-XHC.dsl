@@ -1,18 +1,23 @@
-//IOThunderboltFamily and AppleThunderboltNHI 
+// This ssdt does not call TBFP method, so thunderbolt controller is not enabled.
+// No hotplug, XHC2 disappears when unplug and does not come back when re-plug
+// But able to eject XHC2 from expresscard tray icon (how to do this programmatically?)
+// If eject XHC2 before sleep, XHC2 will be discovered by IOPCIFamily again when wake up
+// So we need to find a way to tell IOPCIFamily to rescan devices when type-c attached
+
+
 DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
 {
-    External (_SB.PCI0.RP01, DeviceObj)    // (from opcode)
-    External (_SB.PCI0.RP01.PXSX, DeviceObj)    // (from opcode)
-    External (_SB.PCI0.XHC, DeviceObj)    // (from opcode)
-    External (_SB.PCI0.XHC.RHUB, DeviceObj)    // (from opcode)
-    External (_SB.PCI0.XHC.RHUB.HS01, DeviceObj)    // (from opcode)
-    External (_SB.PCI0.XHC.RHUB.HS02, DeviceObj)    // (from opcode)
-    External (_SB.PCI0.XHC.RHUB.HS03, DeviceObj)    // (from opcode)
-    External (_SB.PCI0.XHC.RHUB.HS04, DeviceObj)    // (from opcode)
-    External (_SB.PCI0.XHC.RHUB.HS05, DeviceObj)    // (from opcode)
-    External (_SB.PCI0.XHC.RHUB.SS01, DeviceObj)    // (from opcode)
-    External (_SB.PCI0.XHC.RHUB.SS02, DeviceObj)    // (from opcode)
-    External (_SB.TBFP, MethodObj)    // 1 Arguments (from opcode)
+    External (_SB_.PCI0.RP01, DeviceObj)    // (from opcode)
+    External (_SB_.PCI0.RP01.PXSX, DeviceObj)    // (from opcode)
+    External (_SB_.PCI0.XHC_, DeviceObj)    // (from opcode)
+    External (_SB_.PCI0.XHC_.RHUB, DeviceObj)    // (from opcode)
+    External (_SB_.PCI0.XHC_.RHUB.HS01, DeviceObj)    // (from opcode)
+    External (_SB_.PCI0.XHC_.RHUB.HS02, DeviceObj)    // (from opcode)
+    External (_SB_.PCI0.XHC_.RHUB.HS03, DeviceObj)    // (from opcode)
+    External (_SB_.PCI0.XHC_.RHUB.HS04, DeviceObj)    // (from opcode)
+    External (_SB_.PCI0.XHC_.RHUB.HS05, DeviceObj)    // (from opcode)
+    External (_SB_.PCI0.XHC_.RHUB.SS01, DeviceObj)    // (from opcode)
+    External (_SB_.PCI0.XHC_.RHUB.SS02, DeviceObj)    // (from opcode)
     External (HS01, DeviceObj)    // (from opcode)
     External (HS02, DeviceObj)    // (from opcode)
     External (HS03, DeviceObj)    // (from opcode)
@@ -21,15 +26,6 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
     External (RHUB, DeviceObj)    // (from opcode)
     External (SS01, DeviceObj)    // (from opcode)
     External (SS02, DeviceObj)    // (from opcode)
-
-    Device (TBON)
-    {
-        Name (_HID, "TBON1000")  // _HID: Hardware ID
-        Method (_INI, 0, NotSerialized)  // _INI: Initialize
-        {
-            \_SB.TBFP (One)
-        }
-    }
 
     Device (_SB.USBX)
     {
@@ -46,7 +42,6 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
 
             Return (Package (0x08)
             {
-            /*
                 "kUSBSleepPortCurrentLimit", 
                 0x0BB8, 
                 "kUSBSleepPowerSupply", 
@@ -55,15 +50,6 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
                 0x0BB8, 
                 "kUSBWakePowerSupply", 
                 0x0C80
-               */
-                "kUSBSleepPortCurrentLimit", 
-                0x05DC, 
-                "kUSBSleepPowerSupply", 
-                0x05DC, 
-                "kUSBWakePortCurrentLimit", 
-                0x05DC, 
-                "kUSBWakePowerSupply", 
-                0x05DC
             })
         }
     }
@@ -317,115 +303,57 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
         }
     }
 
-    Scope (_SB.PCI0.RP01)
+    Scope (\_SB.PCI0.RP01)
     {
-        Method (_PS0, 0, Serialized)  // _PS0: Power State 0
+        Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
         {
-            \_SB.TBFP (One)
-        }
+            If (LEqual (Arg2, Zero))
+            {
+                Return (Buffer (One)
+                {
+                     0x03                                           
+                })
+            }
 
-        Method (_PS3, 0, Serialized)  // _PS3: Power State 3
-        {
-            \_SB.TBFP (Zero)
-        }
-        
-        Method (_DSM, 4, NotSerialized)
-        {
-	        If (LEqual (Arg2, Zero))
-	        {
-		        Return (Buffer (One){0x03})
-	        }
-	        Return (Package (0x02)
-	        {
-	        	"reg-ltrovr", 
-	        	Buffer (0x08)
-	        	{
-		        	0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-		        }
-	        })
+            Return (Package (0x02)
+            {
+                "reg-ltrovr", 
+                Buffer (0x08)
+                {
+                     0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
+                }
+            })
         }
     }
 
-    Scope (_SB.PCI0.RP01.PXSX)
+    Scope (\_SB.PCI0.RP01.PXSX)
     {
-        /*
-        Name (_ADR, Zero)
-		Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-		{
-			If (!Arg2)
-			{
-				Return (Buffer (One) { 0x03 })
-			}
-
-			Return (Package (0x02)
-			{
-				"PCI-Thunderbolt",
-				One
-			})
-        }
-        */
-        
         Method (_RMV, 0, NotSerialized)  // _RMV: Removal Status
         {
             Return (One)
         }
 
-        Method (_STA, 0, NotSerialized)  // _STA: Status
+        Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
         {
-            Return (0x0F)
+            Store (Package (0x02)
+                {
+                    "PCI-Thunderbolt", 
+                    One
+                }, Local0)
+            Return (Local0)
         }
-        
+
         Device (DSB0)
-		{
-			Name (_ADR, Zero)  // _ADR: Address
-			Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-			{
-				If (!Arg2)
-				{
-					Return (Buffer (One) { 0x03 })
-				}
-
-				Return (Package (0x02)
-				{
-						"PCIHotplugCapable",
-						Zero
-				})
-			}
-
-			Device (NHI0)
-			{
-				Name (_ADR, Zero)  // _ADR: Address
-                 /*
-				Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-				{
-					If (!Arg2)
-					{
-						Return (Buffer (One) { 0x03 })
-					}
-
-					Return (Package (0x02)
-					{
-						"power-save",
-						Zero
-					})
-				}
-                 */
-			}
-        }
-        
-	    Device (DSB1)
-	    {
-			Name (_ADR, 0x00030000)  // _ADR: Address
-        }
-        
-        Device (DSB2)
         {
-            Name (_ADR, 0x00020000)  // _ADR: Address
+            Name (_ADR, Zero)  // _ADR: Address
             Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
             {
-                If (LEqual (Arg2, Zero))
+                If (LNot (Arg2))
                 {
-                    Return (Buffer (One) { 0x03 })
+                    Return (Buffer (One)
+                    {
+                         0x03                                           
+                    })
                 }
 
                 Return (Package (0x02)
@@ -435,30 +363,31 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
                 })
             }
 
-            Device (XHC2)
+            Device (NHI0)
             {
                 Name (_ADR, Zero)  // _ADR: Address
-                Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x03                                           
-                        })
-                    }
+            }
+        }
 
-                    Return (Package (0x06)
-                    {
-                        "USBBusNumber", 
-                        Zero, 
-                        "AAPL,xhci-clock-id", 
-                        One, 
-                        "UsbCompanionControllerPresent", 
-                        Zero
-                    })
+        Device (DSB1)
+        {
+            Name (_ADR, 0x00010000)  // _ADR: Address
+        }
+
+        Device (DSB2)
+        {
+            Name (_ADR, 0x00020000)  // _ADR: Address
+            Device (XHC2)
+            {
+                Method (_PS0, 0, Serialized)  // _PS0: Power State 0
+                {
                 }
 
+                Method (_PS3, 0, Serialized)  // _PS3: Power State 3
+                {
+                }
+
+                Name (_ADR, Zero)  // _ADR: Address
                 Device (RHUB)
                 {
                     Name (_ADR, Zero)  // _ADR: Address
@@ -519,6 +448,11 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
                             }
                         })
                     }
+                }
+
+                Method (MBSD, 0, NotSerialized)
+                {
+                    Return (One)
                 }
             }
         }

@@ -675,7 +675,7 @@
 		<key>BoardManufacturer</key>
 		<string>Apple Inc.</string>
 		<key>BoardSerialNumber</key>
-		<string>C027347014NH9W8FB</string>
+		<string>FAKESERIAL</string>
 		<key>BoardType</key>
 		<integer>10</integer>
 		<key>BoardVersion</key>
