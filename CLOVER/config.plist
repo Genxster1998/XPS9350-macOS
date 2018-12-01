@@ -415,6 +415,24 @@
 					X0dQRVhFNDI=
 					</data>
 				</dict>
+				<dict>
+					<key>Comment</key>
+					<string>_HID -&gt; XHID in ALSD pair SSDT-ALS0</string>
+					<key>Disabled</key>
+					<false/>
+					<key>Find</key>
+					<data>
+					X0hJRA==
+					</data>
+					<key>Replace</key>
+					<data>
+					WEhJRA==
+					</data>
+					<key>TgtBridge</key>
+					<data>
+					QUxTRA==
+					</data>
+				</dict>
 			</array>
 			<key>ReuseFFFF</key>
 			<false/>
