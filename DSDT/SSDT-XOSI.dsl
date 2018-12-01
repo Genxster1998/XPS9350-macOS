@@ -2,12 +2,27 @@
 
 DefinitionBlock("", "SSDT", 2, "hack", "XOSI", 0)
 {
+    /*
+    External (_SB_.TBFP, MethodObj)    // 1 Arguments (from opcode)
+    External (USTP, UnknownObj)    // (from opcode)
+    Name (CNT1, Zero)
+    */
+    
     // All _OSI calls in DSDT are routed to XOSI...
     // As written, this XOSI simulates "Windows 2012" (which is Windows 8)
     // Note: According to ACPI spec, _OSI("Windows") must also return true
     //  Also, it should return true for all previous versions of Windows.
     Method(XOSI, 1)
     {
+        /*
+        Increment (CNT1)
+        If (LEqual (CNT1, One))
+        {
+            \_SB.TBFP (One)
+            Store (One, USTP)
+        }
+        */
+        
         // simulation targets
         // source: (google 'Microsoft Windows _OSI')
         //  http://download.microsoft.com/download/7/E/7/7E7662CF-CBEA-470B-A97E-CE7CE0D98DC2/WinACPI_OSI.docx

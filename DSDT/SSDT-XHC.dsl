@@ -46,6 +46,7 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
 
             Return (Package (0x08)
             {
+            /*
                 "kUSBSleepPortCurrentLimit", 
                 0x0BB8, 
                 "kUSBSleepPowerSupply", 
@@ -54,6 +55,15 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
                 0x0BB8, 
                 "kUSBWakePowerSupply", 
                 0x0C80
+               */
+                "kUSBSleepPortCurrentLimit", 
+                0x05DC, 
+                "kUSBSleepPowerSupply", 
+                0x05DC, 
+                "kUSBWakePortCurrentLimit", 
+                0x05DC, 
+                "kUSBWakePowerSupply", 
+                0x05DC
             })
         }
     }
@@ -338,6 +348,23 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
 
     Scope (_SB.PCI0.RP01.PXSX)
     {
+        /*
+        Name (_ADR, Zero)
+		Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
+		{
+			If (!Arg2)
+			{
+				Return (Buffer (One) { 0x03 })
+			}
+
+			Return (Package (0x02)
+			{
+				"PCI-Thunderbolt",
+				One
+			})
+        }
+        */
+        
         Method (_RMV, 0, NotSerialized)  // _RMV: Removal Status
         {
             Return (One)
@@ -347,7 +374,50 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
         {
             Return (0x0F)
         }
+        
+        Device (DSB0)
+		{
+			Name (_ADR, Zero)  // _ADR: Address
+			Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
+			{
+				If (!Arg2)
+				{
+					Return (Buffer (One) { 0x03 })
+				}
 
+				Return (Package (0x02)
+				{
+						"PCIHotplugCapable",
+						Zero
+				})
+			}
+
+			Device (NHI0)
+			{
+				Name (_ADR, Zero)  // _ADR: Address
+                 /*
+				Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
+				{
+					If (!Arg2)
+					{
+						Return (Buffer (One) { 0x03 })
+					}
+
+					Return (Package (0x02)
+					{
+						"power-save",
+						Zero
+					})
+				}
+                 */
+			}
+        }
+        
+	    Device (DSB1)
+	    {
+			Name (_ADR, 0x00030000)  // _ADR: Address
+        }
+        
         Device (DSB2)
         {
             Name (_ADR, 0x00020000)  // _ADR: Address
@@ -355,10 +425,7 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
             {
                 If (LEqual (Arg2, Zero))
                 {
-                    Return (Buffer (One)
-                    {
-                         0x03                                           
-                    })
+                    Return (Buffer (One) { 0x03 })
                 }
 
                 Return (Package (0x02)
