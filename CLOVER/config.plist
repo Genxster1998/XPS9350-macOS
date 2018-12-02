@@ -577,7 +577,7 @@
 		<key>Scan</key>
 		<true/>
 		<key>Theme</key>
-		<string>Dell</string>
+		<string>Dell_Scalable</string>
 	</dict>
 	<key>Graphics</key>
 	<dict>
