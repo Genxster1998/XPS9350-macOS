@@ -518,7 +518,7 @@
 	<key>Boot</key>
 	<dict>
 		<key>Arguments</key>
-		<string>-cdfon debug=0x12a darkwake=0 acpi_layer=0x08 brcmfx-country=#a msgbuf=512000 acpi_level=0x02</string>
+		<string>darkwake=0 brcmfx-country=#a -cdfon</string>
 		<key>DefaultVolume</key>
 		<string>macOS</string>
 		<key>NeverHibernate</key>
@@ -577,7 +577,7 @@
 		<key>Scan</key>
 		<true/>
 		<key>Theme</key>
-		<string>Dell_Scalable</string>
+		<string>Dell</string>
 	</dict>
 	<key>Graphics</key>
 	<dict>
@@ -728,7 +728,7 @@
 	<key>SystemParameters</key>
 	<dict>
 		<key>InjectKexts</key>
-		<string>Detect</string>
+		<string>Yes</string>
 		<key>InjectSystemID</key>
 		<true/>
 	</dict>
