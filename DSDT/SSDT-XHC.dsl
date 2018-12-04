@@ -1,8 +1,7 @@
 // This ssdt does not call TBFP method, so thunderbolt controller is not enabled.
-// No hotplug, XHC2 disappears when unplug and does not come back when re-plug
-// But able to eject XHC2 from expresscard tray icon (how to do this programmatically?)
-// If eject XHC2 before sleep, XHC2 will be discovered by IOPCIFamily again when wake up
-// So we need to find a way to tell IOPCIFamily to rescan devices when type-c attached
+// XHC2 disappears when unplug
+// Able to eject XHC2 from expresscard tray icon (how to do this programmatically?)
+// If manually eject XHC2 before sleep, XHC2 will be discovered again when wake up
 
 
 DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
@@ -18,6 +17,7 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
     External (_SB_.PCI0.XHC_.RHUB.HS05, DeviceObj)    // (from opcode)
     External (_SB_.PCI0.XHC_.RHUB.SS01, DeviceObj)    // (from opcode)
     External (_SB_.PCI0.XHC_.RHUB.SS02, DeviceObj)    // (from opcode)
+    External (_SB.TBFP, MethodObj)    // 1 Arguments (from opcode)
     External (HS01, DeviceObj)    // (from opcode)
     External (HS02, DeviceObj)    // (from opcode)
     External (HS03, DeviceObj)    // (from opcode)
@@ -305,6 +305,16 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
 
     Scope (\_SB.PCI0.RP01)
     {
+        Method (_PS0, 0, Serialized)  // _PS0: Power State 0
+        {
+            //\_SB.TBFP (One)
+        }
+
+        Method (_PS3, 0, Serialized)  // _PS3: Power State 3
+        {
+            //\_SB.TBFP (Zero)
+        }
+        
         Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
         {
             If (LEqual (Arg2, Zero))
