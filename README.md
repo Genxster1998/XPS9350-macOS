@@ -72,8 +72,9 @@ After boot into installed Mac OS, use `tools/Clover Configurator.app` to tweak c
 
 ## WLAN/Bluetooth
 
-Install `BrcmFirmwareRepo.kext` and `BrcmPatchRAM2.kext` to `/Library/Extensions/` to fix DW1830/DW1560 bluetooth support. (find them in `kexts/Library-Extensions/`). 
+Put `FakePCIID_Broadcom_WiFi.kext` and `FakePCIID.kext` in `Clover/kexts/Other` if you have DW1560.
 
+Install `BrcmFirmwareRepo.kext` and `BrcmPatchRAM2.kext` to `/Library/Extensions/` to fix DW1830/DW1560 bluetooth support. (find them in `kexts/Library-Extensions/`). 
 `tools/KCPM Utility Pro.app` can be used to accomplish this task.
 
 ## Audio
