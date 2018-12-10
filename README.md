@@ -81,7 +81,7 @@ Install `BrcmFirmwareRepo.kext` and `BrcmPatchRAM2.kext` to `/Library/Extensions
 
 In order to support the Realtek ALC256 (ALC3246) codec of the Dell XPS 9350, AppleALC is already included with layout-id `13`.
 
-<del>Alternatively, a custom AppleHDA injector can be used.
+<del>Alternatively, a custom AppleHDA injector with layout-id 2 can be used.
 The script option `--patch-hda` option generates an AppleHDA_ALC256.kext injector and installs it in `/Library/Extensions`</del>.(not tested)
 
 Run `kexts/ComboJack_Installer/install.sh` to install a daemon that fixes several audio issues including headset support. 
