@@ -90,7 +90,7 @@ Run `kexts/ComboJack_Installer/install.sh` to install a daemon that fixes severa
 
 It is a known bug that usb disks get ejected unexpectedly upon sleep/wake, run `kexts/syscl-USBFix/install.sh` to install a daemon that safely unmount usb disks before sleep and remount after wake.
 
-If you need type-c hotplug, replace `CLOVER/ACPI/patched/SSDT-XHC.aml` with `DSDT-backup/SSDT-XHC-alt/SSDT-XHC.aml`, but it has limitations: when you want to put the laptop asleep/awake, detach type-c device, or the type-c port will become invalid, even so sometimes system failed to wake up due to type-c controller (not always, can't figure out why).
+**Type-c hotplug is buggy, after attaching a type-c device you may need to put the laptop asleep and then awake to let system discover the type-c controller.** Replace `CLOVER/ACPI/patched/SSDT-XHC.aml` with `DSDT-backup/SSDT-XHC-alt/SSDT-XHC.aml` will force-power the whole DSL6340 device tree so the type-c controller will not disappear upon unplug/sleep, but it has limitations: when you want to wake the laptop from sleep, detach type-c device, or the type-c port will become invalid when wake up and the laptop won't be able to sleep/shutdown as normal.
 
 ## Thunderbolt
 
