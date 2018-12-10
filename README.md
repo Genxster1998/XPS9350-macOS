@@ -98,13 +98,13 @@ It should work, although there is probably no hotplug/sleep support.
 
 ## CPU Profile
 
-In order for macOS to effectively manage the power profile of the i7-6560U processor in the Dell XPS 9350 model used here, it is necessary to include a powermanagement profile for `X86PlatformPlugin`.
+In order for macOS to effectively manage the power profile of the processor, it is necessary to include a powermanagement profile for `X86PlatformPlugin`.
 
-There are three approaches to CPU power management:
+There are three different solutions to CPU power management, use only one of them:
 
-* Put `kexts/cpupm/CPUFriend.kext` in `Clover/kexts/Other`, put `kexts/cpupm/SSDT-CpuFriend.aml` in `Clover/ACPI/patched`.
-* Put `kexts/cpupm/CPUFriend.kext` and `kexts/cpupm/CPUFriendDataProvider.kext` in `Clover/kexts/Other`.
-* Install `kexts/cpupm/X86PlatformPluginInjector.kext` to `/Library/Extensions`.
+* Put `kexts/CPUPM/CPUFriend.kext` in `Clover/kexts/Other`, put `kexts/CPUPM/<your-cpu-model-here>/SSDT-CpuFriend.aml` in `Clover/ACPI/patched`.
+* Put `kexts/CPUPM/CPUFriend.kext` and `kexts/CPUPM/<your-cpu-model-here>/CPUFriendDataProvider.kext` in `Clover/kexts/Other`.
+* Install `kexts/CPUPM/<your-cpu-model-here>/X86PlatformPluginInjector.kext` to `/Library/Extensions`.
 
 Instructions on how to build a power mangaement profile for any other CPU types can be found here: [CPUFriend By PMheart](https://github.com/PMheart/CPUFriend/blob/master/Instructions.md)
 
