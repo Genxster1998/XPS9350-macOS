@@ -72,7 +72,7 @@ After boot into installed Mac OS, use `tools/Clover Configurator.app` to tweak c
 
 ## WLAN/Bluetooth
 
-Put `FakePCIID_Broadcom_WiFi.kext` and `FakePCIID.kext` in `Clover/kexts/Other` if you have DW1560.
+Put `FakePCIID_Broadcom_WiFi.kext` and `FakePCIID.kext` in `Clover/kexts/Other` if you have non-working broadcom wlan device described here: [OS-X-Fake-PCI-ID](https://github.com/rehabman/OS-X-Fake-PCI-ID/tree/master).
 
 Install `BrcmFirmwareRepo.kext` and `BrcmPatchRAM2.kext` to `/Library/Extensions/` to fix DW1830/DW1560 bluetooth support. (find them in `kexts/Library-Extensions/`). 
 `tools/KCPM Utility Pro.app` can be used to accomplish this task.
