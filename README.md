@@ -1,6 +1,6 @@
 # macOS on Dell XPS 9350
 
-This repository contains a sample configuration to run macOS (Currently Mojave Sierra `10.14.1`) on a Dell XPS 9350
+This repository contains a sample configuration to run macOS (Currently Mojave Sierra `10.14.2`) on a Dell XPS 9350
 
 ## Used Hardware Configuration
 
@@ -88,9 +88,9 @@ Run `kexts/ComboJack_Installer/install.sh` to install a daemon that fixes severa
 
 ## USB
 
-It is a known bug that usb disks get ejected unexpectedly upon sleep/wake, run `kexts/syscl-USBFix/install.sh` to install a daemon that safely unmount usb disks before sleep and remount after wake.
+It is a known bug that usb disks get ejected unexpectedly upon sleep/wake, run `kexts/USBFix/install.sh` to install a daemon that safely unmount usb disks before sleep and remount after wake.
 
-**Type-c hotplug is buggy, after attaching a type-c device you may need to put the laptop asleep and then awake to let system discover the type-c controller.** Replace `CLOVER/ACPI/patched/SSDT-XHC.aml` with `DSDT-backup/SSDT-XHC-alt/SSDT-XHC.aml` will force-power the whole DSL6340 device tree so the type-c controller will not disappear upon unplug/sleep, but it has limitations: when you want to wake the laptop from sleep, detach type-c device, or the type-c port will become invalid when wake up and the laptop won't be able to sleep/shutdown as normal.
+**Type-c hotplug is buggy, after unplugged you have to wait for about 10 seconds to plug again. Anyway, avoid plugging and unplugging too often, it could crash the system.** 
 
 ## Thunderbolt
 
