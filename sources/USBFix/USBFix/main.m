@@ -21,6 +21,7 @@
 #include <IOKit/ps/IOPowerSources.h>
 #include <IOKit/usb/IOUSBLib.h>
 #include <IOKit/pwr_mgt/IOPMLib.h>
+#include <AppKit/AppKit.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,6 +65,7 @@ io_object_t notifierObject;
 IONotificationPortRef  usbEjectNotifyPort;
 IONotificationPortRef  XHC2NotifyPort;
 bool xhc2EjectBlock = false;
+int xhc2EjectStatus = 1;
 
 void getListOfEjectableMedia(NSMutableArray *result)
 {
@@ -284,8 +286,8 @@ kern_return_t rp01Probe(uint32_t options)
 	kernel_return_status = IOConnectCallScalarMethod(DataConnection, connectiontype, &input, inputCount, &output, &outputCount);
 	fprintf(stderr, "probe option 0x%x, result 0x%x\n", options, kernel_return_status);
     
-    IOServiceClose(IOElectrifyBridgeIOService);
     EXIT:
+    IOServiceClose(DataConnection);
     IOObjectRelease(IOElectrifyBridgeIOService);
 	return kernel_return_status;
 }
@@ -316,7 +318,7 @@ kern_return_t IOElectrifyCMD(uint32_t connectiontype, uint64_t input)
 	kernel_return_status = IOConnectCallScalarMethod(DataConnection, connectiontype, &input, inputCount, &output, &outputCount);
 	fprintf(stderr, "Result: %d\n", kernel_return_status);
     
-    IOServiceClose(IOElectrifyIOService);
+    IOServiceClose(DataConnection);
     EXIT:
     IOObjectRelease(IOElectrifyIOService);
 	return kernel_return_status;
@@ -743,6 +745,74 @@ void XHC2WatcherThread(void)
     CFRunLoopRun();
 }
 
+
+unsigned char * bin_to_strhex(const unsigned char *bin, unsigned int binsz,
+                                  unsigned char **result)
+{
+  unsigned char     hex_str[]= "0123456789abcdef";
+  unsigned int      i;
+
+  if (!(*result = (unsigned char *)malloc(binsz * 2 + 1)))
+    return (NULL);
+
+  (*result)[binsz * 2] = 0;
+
+  if (!binsz)
+    return (NULL);
+
+  for (i = 0; i < binsz; i++)
+    {
+      (*result)[i * 2 + 0] = hex_str[(bin[i] >> 4) & 0x0F];
+      (*result)[i * 2 + 1] = hex_str[(bin[i]     ) & 0x0F];
+    }
+  return (*result);
+}
+
+void SendQuitToProcess(NSString* named)
+{   
+
+    for ( id app in [[NSWorkspace sharedWorkspace] runningApplications] ) 
+    {
+        if ( [named isEqualToString:[[app executableURL] lastPathComponent]]) 
+        {
+            [(NSTask*)app terminate];
+        }
+    }
+
+}
+
+void fixRtlWlan(NSString *content)
+{
+	io_service_t IORTLWlanUSB = 0;
+    //RtWlanU1827 RtWlanU
+	IORTLWlanUSB = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("RtWlanU"));
+    if (!IORTLWlanUSB)
+        IORTLWlanUSB = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("RtWlanU1827"));
+    if (IORTLWlanUSB)
+    {
+        CFDataRef res = IORegistryEntryCreateCFProperty(IORTLWlanUSB, CFSTR("IOMACAddress"), kCFAllocatorDefault, 0);
+        if (res)
+        {
+            SendQuitToProcess(@"Wireless Network Utility");
+            unsigned char * buf = (unsigned char*) CFDataGetBytePtr(res);
+            unsigned char * result;
+            //sizeof(buf)
+            fprintf(stderr, "RTLWlan MAC Address: %s\n", bin_to_strhex(buf, 6, &result));
+            NSString *configPath = @"/Applications/Wireless Network Utility.app/";
+            configPath = [configPath stringByAppendingString:[NSString stringWithCString:(const char *)result encoding:NSASCIIStringEncoding]];
+            configPath = [configPath stringByAppendingString:@"rfoff.rtl"];
+            free(result);
+            //NSString *content = @"1";
+            [content writeToFile:configPath 
+                     atomically:NO 
+                     encoding:NSStringEncodingConversionAllowLossy 
+                     error:nil];
+            [[NSWorkspace sharedWorkspace] launchApplication:@"Wireless Network Utility"];
+        }
+        IOObjectRelease(IORTLWlanUSB);
+    }
+}
+
 // Sleep/Wake event callback function, calls the fixup function
 void SleepWakeCallBack( void * refCon, io_service_t service, natural_t messageType, void * messageArgument )
 {
@@ -752,6 +822,7 @@ void SleepWakeCallBack( void * refCon, io_service_t service, natural_t messageTy
             IOAllowPowerChange( root_port, (long)messageArgument );
             break;
         case kIOMessageSystemWillNotSleep:
+            fixRtlWlan(@"0");
             for(NSString* item in ejectMedia)   
             {
                 DADiskRef disk = DADiskCreateFromBSDName(kCFAllocatorDefault, session, [item cStringUsingEncoding:NSUTF8StringEncoding]);
@@ -776,8 +847,9 @@ void SleepWakeCallBack( void * refCon, io_service_t service, natural_t messageTy
                 CFRelease(disk);
 				//doShellScript(@"/usr/sbin/diskutil", [NSArray arrayWithObjects: @"eject", @"", nil]);
             }
-            ejectXHC2(true);
+            xhc2EjectStatus = ejectXHC2(true);
             //ThunderboltForcePower(false);
+            fixRtlWlan(@"1");
             IOAllowPowerChange( root_port, (long)messageArgument );
             break;
         case kIOMessageSystemWillPowerOn:
@@ -786,15 +858,15 @@ void SleepWakeCallBack( void * refCon, io_service_t service, natural_t messageTy
             break;
         case kIOMessageSystemHasPoweredOn:
             printf("Wake fix.\n");
-			sleep(3);
-
         	IONotificationPortDestroy(usbEjectNotifyPort);
             CFRunLoopStop(usbEjectRunLoop);
         	IONotificationPortDestroy(XHC2NotifyPort);
             CFRunLoopStop(XHC2RunLoop);
             pthread_create(&xhc2_id,NULL,(void*)XHC2WatcherThread,NULL);
             pthread_create(&usb_eject_id,NULL,(void*)UsbEjectWatcherThread,NULL);
-            
+            fixRtlWlan(@"0");
+            if (!xhc2EjectStatus)
+			    sleep(3);
             for(NSString* item in ejectMedia)   
             {
                 DADiskRef disk = DADiskCreateFromBSDName(kCFAllocatorDefault, session, [item cStringUsingEncoding:NSUTF8StringEncoding]);
@@ -881,6 +953,7 @@ int startDaemon() {
 
 int usage()
 {
+    
     fprintf(stderr, 
     "USBFix by maz-1\n"
     "usage:\n"
