@@ -50,7 +50,7 @@ enum
 //pmset.c
 #define kMaxArgStringLength 49
 
-NSMutableArray *ejectMedia = nil;
+NSMutableArray *ejectMediaArr = nil;
 DASessionRef session = nil;
 bool run = true;
 struct stat consoleinfo;
@@ -66,54 +66,6 @@ IONotificationPortRef  usbEjectNotifyPort;
 IONotificationPortRef  XHC2NotifyPort;
 bool xhc2EjectBlock = false;
 int xhc2EjectStatus = 1;
-
-void getListOfEjectableMedia(NSMutableArray *result)
-{
-    [result removeAllObjects];
-    NSArray *mountedRemovableMedia = [[NSFileManager defaultManager] mountedVolumeURLsIncludingResourceValuesForKeys:nil options:NSVolumeEnumerationSkipHiddenVolumes];
-    for(NSURL *volURL in mountedRemovableMedia)
-    {
-        int                 err = 0;
-        DADiskRef           disk = NULL;
-        CFDictionaryRef     descDict = NULL;
-        DASessionRef session = DASessionCreate(NULL);
-        if (session == NULL) {
-            err = EINVAL;
-        }
-        if (err == 0) {
-            disk = DADiskCreateFromVolumePath(NULL,session,(CFURLRef)volURL);
-            if (session == NULL) {
-                err = EINVAL;
-            }
-        }
-        if (err == 0) {
-            descDict = DADiskCopyDescription(disk);
-            if (descDict == NULL) {
-                err = EINVAL;
-            }
-        }
-        if (err == 0) {
-            CFTypeRef mediaEjectableKey = CFDictionaryGetValue(descDict,kDADiskDescriptionMediaEjectableKey);
-            CFTypeRef deviceProtocolName = CFDictionaryGetValue(descDict,kDADiskDescriptionDeviceProtocolKey);
-            if (mediaEjectableKey != NULL)
-            {
-                BOOL op = CFEqual(mediaEjectableKey, CFSTR("0")) || CFEqual(deviceProtocolName, CFSTR("USB"));
-                if (op) {
-                    [result addObject:[NSString stringWithUTF8String:DADiskGetBSDName(disk)]];
-                }
-            }
-        }
-        if (descDict != NULL) {
-            CFRelease(descDict);
-        }
-        if (disk != NULL) {
-            CFRelease(disk);
-        }
-        if (session != NULL) {
-            CFRelease(session);
-        }
-    }
-}
 
 NSString *doShellScript(NSString *cmd_launch_path, NSArray *cmd_pt) {
     NSTask *task = [[NSTask alloc] init]; // Make a new task
@@ -745,21 +697,16 @@ void XHC2WatcherThread(void)
     CFRunLoopRun();
 }
 
-
 unsigned char * bin_to_strhex(const unsigned char *bin, unsigned int binsz,
                                   unsigned char **result)
 {
   unsigned char     hex_str[]= "0123456789abcdef";
   unsigned int      i;
-
   if (!(*result = (unsigned char *)malloc(binsz * 2 + 1)))
     return (NULL);
-
   (*result)[binsz * 2] = 0;
-
   if (!binsz)
     return (NULL);
-
   for (i = 0; i < binsz; i++)
     {
       (*result)[i * 2 + 0] = hex_str[(bin[i] >> 4) & 0x0F];
@@ -783,6 +730,10 @@ void SendQuitToProcess(NSString* named)
 
 void fixRtlWlan(NSString *content)
 {
+    BOOL isDir;
+    NSString *appPath = @"/Applications/Wireless Network Utility.app";
+    if (![[NSFileManager defaultManager] fileExistsAtPath:appPath isDirectory:&isDir] || !isDir)
+        return;
 	io_service_t IORTLWlanUSB = 0;
     //RtWlanU1827 RtWlanU
 	IORTLWlanUSB = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("RtWlanU"));
@@ -798,7 +749,8 @@ void fixRtlWlan(NSString *content)
             unsigned char * result;
             //sizeof(buf)
             fprintf(stderr, "RTLWlan MAC Address: %s\n", bin_to_strhex(buf, 6, &result));
-            NSString *configPath = @"/Applications/Wireless Network Utility.app/";
+            //NSString *configPath = @"/Applications/Wireless Network Utility.app/";
+            NSString *configPath = [appPath stringByAppendingString:@"/"];
             configPath = [configPath stringByAppendingString:[NSString stringWithCString:(const char *)result encoding:NSASCIIStringEncoding]];
             configPath = [configPath stringByAppendingString:@"rfoff.rtl"];
             free(result);
@@ -813,6 +765,69 @@ void fixRtlWlan(NSString *content)
     }
 }
 
+
+void ejectMedia(bool eject)
+{
+    if (eject == true)
+    {
+        [ejectMediaArr removeAllObjects];
+        NSArray *mountedRemovableMedia = [[NSFileManager defaultManager] mountedVolumeURLsIncludingResourceValuesForKeys:nil options:NSVolumeEnumerationSkipHiddenVolumes];
+        for(NSURL *volURL in mountedRemovableMedia)
+        {
+            int                 err = 0;
+            DADiskRef           disk = NULL;
+            CFDictionaryRef     descDict = NULL;
+            DASessionRef session = DASessionCreate(NULL);
+            if (session == NULL) {
+                err = EINVAL;
+            }
+            if (err == 0) {
+                disk = DADiskCreateFromVolumePath(NULL,session,(CFURLRef)volURL);
+                if (session == NULL) {
+                    err = EINVAL;
+                }
+            }
+            if (err == 0) {
+                descDict = DADiskCopyDescription(disk);
+                if (descDict == NULL) {
+                    err = EINVAL;
+                }
+            }
+            if (err == 0) {
+                CFTypeRef mediaEjectableKey = CFDictionaryGetValue(descDict,kDADiskDescriptionMediaEjectableKey);
+                CFTypeRef deviceProtocolName = CFDictionaryGetValue(descDict,kDADiskDescriptionDeviceProtocolKey);
+                if (mediaEjectableKey != NULL)
+                {
+                    BOOL op = CFEqual(mediaEjectableKey, CFSTR("0")) || CFEqual(deviceProtocolName, CFSTR("USB"));
+                    if (op) {
+                        [ejectMediaArr addObject:[NSString stringWithUTF8String:DADiskGetBSDName(disk)]];
+        				DADiskUnmount(disk, kDADiskUnmountOptionForce, NULL, NULL);
+                    }
+                }
+            }
+            if (descDict != NULL) {
+                CFRelease(descDict);
+            }
+            if (disk != NULL) {
+                CFRelease(disk);
+            }
+            if (session != NULL) {
+                CFRelease(session);
+            }
+        }
+    }
+    else
+    {
+        for(NSString* item in ejectMediaArr)   
+        {
+            DADiskRef disk = DADiskCreateFromBSDName(kCFAllocatorDefault, session, [item cStringUsingEncoding:NSUTF8StringEncoding]);
+            DADiskMount(disk, NULL, DADiskGetOptions(disk), NULL, NULL);
+        }
+        [ejectMediaArr removeAllObjects];
+    }
+}
+
+
 // Sleep/Wake event callback function, calls the fixup function
 void SleepWakeCallBack( void * refCon, io_service_t service, natural_t messageType, void * messageArgument )
 {
@@ -823,30 +838,12 @@ void SleepWakeCallBack( void * refCon, io_service_t service, natural_t messageTy
             break;
         case kIOMessageSystemWillNotSleep:
             fixRtlWlan(@"0");
-            for(NSString* item in ejectMedia)   
-            {
-                DADiskRef disk = DADiskCreateFromBSDName(kCFAllocatorDefault, session, [item cStringUsingEncoding:NSUTF8StringEncoding]);
-                DADiskMount(disk, 
-                            NULL, 
-                            DADiskGetOptions(disk),
-                            NULL, 
-                            NULL);
-            }
+            ejectMedia(false);
             break;
         case kIOMessageSystemWillSleep:
             printf("Sleep fix.\n");
             setHibernationMode();
-            getListOfEjectableMedia(ejectMedia);
-            for(NSString* item in ejectMedia)
-            {
-                DADiskRef disk = DADiskCreateFromBSDName(kCFAllocatorDefault, session, [item cStringUsingEncoding:NSUTF8StringEncoding]);
-				DADiskUnmount(disk, 
-                              kDADiskUnmountOptionForce, 
-                              NULL, 
-                              NULL);
-                CFRelease(disk);
-				//doShellScript(@"/usr/sbin/diskutil", [NSArray arrayWithObjects: @"eject", @"", nil]);
-            }
+            ejectMedia(true);
             xhc2EjectStatus = ejectXHC2(true);
             //ThunderboltForcePower(false);
             fixRtlWlan(@"1");
@@ -866,16 +863,8 @@ void SleepWakeCallBack( void * refCon, io_service_t service, natural_t messageTy
             pthread_create(&usb_eject_id,NULL,(void*)UsbEjectWatcherThread,NULL);
             fixRtlWlan(@"0");
             if (!xhc2EjectStatus)
-			    sleep(3);
-            for(NSString* item in ejectMedia)   
-            {
-                DADiskRef disk = DADiskCreateFromBSDName(kCFAllocatorDefault, session, [item cStringUsingEncoding:NSUTF8StringEncoding]);
-                DADiskMount(disk, 
-                            NULL, 
-                            DADiskGetOptions(disk),
-                            NULL, 
-                            NULL);
-            }
+			    sleep(2);
+            ejectMedia(false);
             break;
         default:
             break;
@@ -911,7 +900,7 @@ int startDaemon() {
     signal(SIGKILL, sigHandler);
     signal(SIGTSTP, sigHandler);
     
-    ejectMedia = [NSMutableArray array];
+    ejectMediaArr = [NSMutableArray array];
     session = DASessionCreate(NULL);
     
     //start a new thread that waits for wakeup event

@@ -16,7 +16,7 @@ sudo launchctl unload /Library/LaunchDaemons/com.maz1.USBFix.plist
 sudo rm /Library/LaunchDaemons/com.maz1.USBFix.plist
 
 # install 
-
+mkdir -p /usr/local/sbin
 sudo cp USBFix /usr/local/sbin
 sudo chmod 755 /usr/local/sbin/USBFix
 sudo chown root:wheel /usr/local/sbin/USBFix
