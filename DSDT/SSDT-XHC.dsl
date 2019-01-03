@@ -3,7 +3,6 @@
 // Able to eject XHC2 from expresscard tray icon (how to do this programmatically?)
 // If manually eject XHC2 before sleep, XHC2 will be discovered again when wake up
 
-
 DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
 {
     External (_SB_.PCI0.RP01, DeviceObj)    // (from opcode)
@@ -17,7 +16,7 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
     External (_SB_.PCI0.XHC_.RHUB.HS05, DeviceObj)    // (from opcode)
     External (_SB_.PCI0.XHC_.RHUB.SS01, DeviceObj)    // (from opcode)
     External (_SB_.PCI0.XHC_.RHUB.SS02, DeviceObj)    // (from opcode)
-    External (_SB.TBFP, MethodObj)    // 1 Arguments (from opcode)
+    External (DTGP, MethodObj)    // 5 Arguments (from opcode)
     External (HS01, DeviceObj)    // (from opcode)
     External (HS02, DeviceObj)    // (from opcode)
     External (HS03, DeviceObj)    // (from opcode)
@@ -161,6 +160,53 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
 
     Scope (\_SB.PCI0.XHC)
     {
+        Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
+        {
+            Store (Package (0x17)
+                {
+                    "AAPL,clock-id", 
+                    Buffer (One)
+                    {
+                         0x02                                           
+                    }, 
+
+                    "AAPL,slot-name", 
+                    "Built In", 
+                    "name", 
+                    "Intel XHCI Controller", 
+                    "model", 
+                    Buffer (0x38)
+                    {
+                        "Intel 10 Series Chipset Family USB xHCI Host Controller"
+                    }, 
+
+                    "device_type", 
+                    Buffer (0x0F)
+                    {
+                        "USB Controller"
+                    }, 
+
+                    "AAPL,current-available", 
+                    0x0834, 
+                    "AAPL,current-extra", 
+                    0x0A8C, 
+                    "AAPL,current-in-sleep", 
+                    0x03E8, 
+                    "AAPL,current-extra-in-sleep", 
+                    0x0834, 
+                    "AAPL,max-port-current-in-sleep", 
+                    0x0A8C, 
+                    "AAPL,device-internal", 
+                    0x02, 
+                    Buffer (One)
+                    {
+                         0x00                                           
+                    }
+                }, Local0)
+            DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))
+            Return (Local0)
+        }
+
         Scope (RHUB)
         {
             Scope (HS01)
@@ -307,14 +353,12 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
     {
         Method (_PS0, 0, Serialized)  // _PS0: Power State 0
         {
-            //\_SB.TBFP (One)
         }
 
         Method (_PS3, 0, Serialized)  // _PS3: Power State 3
         {
-            //\_SB.TBFP (Zero)
         }
-        
+
         Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
         {
             If (LEqual (Arg2, Zero))

@@ -1,26 +1,63 @@
 
 DefinitionBlock ("", "SSDT", 1, "syscl", "ARPT", 0x00003000)
 {
-    External (_SB_.PCI0.RP05, DeviceObj)    // (from opcode)
-    External (_SB_.PCI0.RP05.PXSX, DeviceObj)    // (from opcode)
-    External (PXSX, DeviceObj)    // (from opcode)
+    External (_SB_.PCI0.RP05, DeviceObj)
+    External (_SB_.PCI0.RP05.PXSX, DeviceObj)
+    External (PXSX, DeviceObj)
+    External (DTGP, MethodObj)
 
     Scope (\_SB.PCI0.RP05)
     {
-        Method (_DSM, 4, NotSerialized)
+        Method (_DSM, 4, NotSerialized) 
         {
-	        If (LEqual (Arg2, Zero))
-	        {
-		        Return (Buffer (One){0x03})
-	        }
-	        Return (Package (0x02)
-	        {
-	        	"reg-ltrovr", 
-	        	Buffer (0x08)
-	        	{
-		        	0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-		        }
-	        })
+                If (LEqual (Arg2, Zero))
+                {
+                    Return (Buffer (One)
+                    {
+                         0x03                                           
+                    })
+                }
+
+                Store (Package ()
+                    {
+                        "AAPL,slot-name", 
+                        Buffer ()
+                        {
+                            "M.2 key B"
+                        }, 
+
+                        "name", 
+                        Buffer ()
+                        {
+                            "Broadcom 802.11ac Wireless Network Adapter"
+                        }, 
+
+                        "model", 
+                        Buffer ()
+                        {
+                            "Broadcom 802.11ac Wireless Network Adapter"
+                        }, 
+
+                        "device_type", 
+                        Buffer ()
+                        {
+                            "WLAN Device"
+                        }, 
+
+                        "hda-gfx", 
+                        Buffer ()
+                        {
+                            "onboard-1"
+                        }, 
+
+                        "reg-ltrovr", 
+                        Buffer ()
+                        {
+                             0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
+                        }
+                    }, Local0)
+                DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))
+                Return (Local0)
         }
         
         Scope (PXSX)
