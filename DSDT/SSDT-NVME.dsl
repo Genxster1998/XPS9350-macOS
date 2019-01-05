@@ -56,9 +56,9 @@ DefinitionBlock ("", "SSDT", 2, "hack", "NVMe-PM", 0x00000000)
             }
     }
     
-    External (_SB_.PCI0.SAT0.PRT0, DeviceObj)
+    External (_SB_.PCI0.SATA.PRT0, DeviceObj)
     External (GTF0, IntObj)
-    Scope (_SB_.PCI0.SAT0.PRT0)
+    Scope (_SB_.PCI0.SATA.PRT0)
     {
         //Name (_ADR, 0xFFFF)
 	    Method (_SDD, 1, NotSerialized)  // _SDD: Set Device Data\n
