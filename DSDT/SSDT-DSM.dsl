@@ -5,6 +5,7 @@ DefinitionBlock ("", "SSDT", 2, "hack", "DSM", 0x00000000)
     External (DTGP, MethodObj)
     //RP01 -> SSDT-XHC.dsl / SSDT-TYPC.dsl
     //RP05 -> SSDT-PXSX2ARPT.dsl
+    //RP09 -> SSDT-NVME.dsl
 
     External (_SB.PCI0.RP06.PXSX, DeviceObj)
 
