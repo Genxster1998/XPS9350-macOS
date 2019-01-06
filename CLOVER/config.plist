@@ -701,11 +701,20 @@
 		<string>macOS</string>
 		<key>NeverHibernate</key>
 		<true/>
+		<key>NoEarlyProgress</key>
+		<true/>
 		<key>Secure</key>
 		<false/>
 		<key>Timeout</key>
 		<integer>2</integer>
 		<key>XMPDetection</key>
+		<integer>1</integer>
+	</dict>
+	<key>BootGraphics</key>
+	<dict>
+		<key>EFILoginHiDPI</key>
+		<integer>0</integer>
+		<key>UIScale</key>
 		<integer>1</integer>
 	</dict>
 	<key>CPU</key>

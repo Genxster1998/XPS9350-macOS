@@ -161,7 +161,7 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
                         }
                     }
                 }
-            },
+            }/*,
             
             "8086_15b5", 
             Package ()
@@ -199,7 +199,7 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
                         }
                     }
                 }
-            }
+            }*/
         })
     }
 
