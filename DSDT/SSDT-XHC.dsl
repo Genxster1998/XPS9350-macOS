@@ -25,6 +25,7 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
     External (RHUB, DeviceObj)    // (from opcode)
     External (SS01, DeviceObj)    // (from opcode)
     External (SS02, DeviceObj)    // (from opcode)
+    External (_SB.TBFP, MethodObj)
 
     Device (_SB.USBX)
     {
@@ -56,15 +57,21 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
     Device (UIAC)
     {
         Name (_HID, "UIA00000")  // _HID: Hardware ID
-        Name (RMCF, Package (0x02)
+        Name (RMCF, Package ()
         {
             "8086_9d2f", 
             Package (0x04)
             {
                 "port-count", 
+                /*
                 Buffer (0x04)
                 {
                      0x12, 0x00, 0x00, 0x00                         
+                }, 
+                */
+                Buffer (0x04)
+                {
+                     0x0E, 0x00, 0x00, 0x00                         
                 }, 
 
                 "ports", 
@@ -151,6 +158,44 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
                         Buffer (0x04)
                         {
                              0x0E, 0x00, 0x00, 0x00                         
+                        }
+                    }
+                }
+            },
+            
+            "8086_15b5", 
+            Package ()
+            {
+                "port-count", 
+                Buffer (0x04)
+                {
+                     0x02, 0x00, 0x00, 0x00                         
+                }, 
+                
+                "ports", 
+                Package ()
+                {
+                    "SSP1", 
+                    Package (0x04)
+                    {
+                        "UsbConnector", 
+                        0x09, 
+                        "port", 
+                        Buffer (0x04)
+                        {
+                             0x01, 0x00, 0x00, 0x00                         
+                        }
+                    }, 
+
+                    "SSP2", 
+                    Package (0x04)
+                    {
+                        "UsbConnector", 
+                        0x09, 
+                        "port", 
+                        Buffer (0x04)
+                        {
+                             0x03, 0x00, 0x00, 0x00                         
                         }
                     }
                 }
@@ -353,10 +398,12 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
     {
         Method (_PS0, 0, Serialized)  // _PS0: Power State 0
         {
+            //\_SB.TBFP (One)
         }
 
         Method (_PS3, 0, Serialized)  // _PS3: Power State 3
         {
+            //\_SB.TBFP (Zero)
         }
 
         Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
