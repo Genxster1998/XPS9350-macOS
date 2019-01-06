@@ -40,23 +40,16 @@ This repository has been tested against Dell XP 9350 bios version `1.9.0`. For b
 * Open `Section_PE32_image_Setup_Setup.sct` with [Universal IFR Extractor](https://github.com/donovan6000/Universal-IFR-Extractor) and click extract, there will be a file named `Section_PE32_image_Setup_Setup IFR.txt`
 * Open `Section_PE32_image_Setup_Setup IFR.txt` and you will see all the hidden settings.
 
-**If your cpu is not i7 6560U (which means you have Intel HD Graphics instead of Intel Iris Graphics)**, in order to run macOS successfully, some EFI BIOS variables need to be modified. The included Clover bootloader contains an updated `DVMT.efi`, which includes a `setup_var` command to help do just that.
+The included Clover bootloader contains an updated `DVMT.efi`, which includes a `setup_var` command to change UEFI variables. You can launch `DVMT.efi` either from Clover directly by renaming it to `Shell64U.efi` in the `tools` folder or from a custom UEFI entry to `DVMT.efi` added in BIOS settings.
 
-`DVMT.efi` can be launched from Clover directly by renaming it to `Shell64U.efi` in the `tools` folder.
-
-The following variables need to be updated **If your cpu is not i7 6560U**:
-
-| Variable              | Offset | Default value  | Desired value   | Comment                                                    |
-|-----------------------|--------|----------------|-----------------|------------------------------------------------------------|
-| DVMT Pre-allocation   | 0x432  | 0x01 (32M)     | 0x06 (192M)     | Increase DVMT pre-allocated size to 192M for QHD+ displays |
-| DVMT Total Gfx Memory | 0x433  | 0x01 (128M)    | 0x03 (MAX)      | Increase total gfx memory limit to maximum                 |
-
-
-Whether to modify the following variables is up to you, I personally modified it in case the `MSR 0xE2 _xcpm_idle kernel patch` is not updated for new mac os release.
+You can modify the following variables in case the `MSR 0xE2 _xcpm_idle kernel patch` or `whatevergreen` are not updated for new mac os release. **If you have no idea about UEFI variables, just ignore this section.**
 
 | Variable              | Offset | Default value  | Desired value   | Comment                                                    |
 |-----------------------|--------|----------------|-----------------|------------------------------------------------------------|
 | CFG Lock              | 0x109  | 0x01 (Enabled) | 0x00 (Disabled) | Disable CFG Lock to prevent MSR 0x02 errors on boot        |
+| DVMT Pre-allocation   | 0x432  | 0x01 (32M)     | 0x06 (192M)     | Increase DVMT pre-allocated size to 192M for QHD+ displays (not needed by Iris graphics) |
+| DVMT Total Gfx Memory | 0x433  | 0x01 (128M)    | 0x03 (MAX)      | Increase total gfx memory limit to maximum (not needed by Iris graphics) |
+
 
 ## Clover Configuration
 
@@ -72,10 +65,9 @@ After boot into installed Mac OS, use `tools/Clover Configurator.app` to tweak c
 
 ## WLAN/Bluetooth
 
-Put `FakePCIID_Broadcom_WiFi.kext` and `FakePCIID.kext` in `Clover/kexts/Other` if you have non-working broadcom wlan device described here: [OS-X-Fake-PCI-ID](https://github.com/rehabman/OS-X-Fake-PCI-ID/tree/master).
+<del>Put `FakePCIID_Broadcom_WiFi.kext` and `FakePCIID.kext` in `Clover/kexts/Other` if you have non-working broadcom wlan device described here: [OS-X-Fake-PCI-ID](https://github.com/rehabman/OS-X-Fake-PCI-ID/tree/master).</del> `AirportBrcmFixup` should be able to do all the job.
 
-Install `BrcmFirmwareRepo.kext` and `BrcmPatchRAM2.kext` to `/Library/Extensions/` to fix DW1830/DW1560 bluetooth support. (find them in `kexts/Library-Extensions/`). 
-`tools/KCPM Utility Pro.app` can be used to accomplish this task.
+To fix DW1830/DW1560 bluetooth support, run `kexts/Library-Extensions/install.sh` to install `BrcmFirmwareRepo.kext` and `BrcmPatchRAM2.kext` to `/Library/Extensions/`
 
 ## Audio
 

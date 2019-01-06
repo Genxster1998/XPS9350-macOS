@@ -1,19 +1,25 @@
 #!/bin/bash
-cd `dirname $0`
+
+if [[ $EUID -ne 0 ]];
+then
+    exec sudo /bin/bash "$0" "$@"
+fi
+
+cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 # Clean legacy stuff
 #
 
-sudo rm /usr/local/sbin/sleepwatcher
-sudo launchctl unload /Library/LaunchDaemons/com.syscl.externalfix.sleepwatcher.plist
-sudo rm /Library/LaunchDaemons/com.syscl.externalfix.sleepwatcher.plist
-sudo rm /etc/sysclusbfix.sleep
-sudo rm /etc/sysclusbfix.wake
-sudo rm /etc/sysclusbfix.unplug
+sudo rm -f /usr/local/sbin/sleepwatcher
+sudo launchctl unload /Library/LaunchDaemons/com.syscl.externalfix.sleepwatcher.plist 2>/dev/null
+sudo rm -f /Library/LaunchDaemons/com.syscl.externalfix.sleepwatcher.plist
+sudo rm -f /etc/sysclusbfix.sleep
+sudo rm -f /etc/sysclusbfix.wake
+sudo rm -f /etc/sysclusbfix.unplug
 
-sudo rm /usr/local/sbin/USBFix
-sudo launchctl unload /Library/LaunchDaemons/com.maz1.USBFix.plist
-sudo rm /Library/LaunchDaemons/com.maz1.USBFix.plist
+sudo rm -f /usr/local/sbin/USBFix
+sudo launchctl unload /Library/LaunchDaemons/com.maz1.USBFix.plist 2>/dev/null
+sudo rm -f /Library/LaunchDaemons/com.maz1.USBFix.plist
 
 # install 
 mkdir -p /usr/local/sbin
