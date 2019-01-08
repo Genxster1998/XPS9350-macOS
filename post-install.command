@@ -40,17 +40,16 @@ fi
 
 EFIs=$(diskutil list|perl -ne '/^\s+\d+:\s+EFI\s+.*(disk\S+)\s*$/ and print "$1\n"'|while read line; \
     do \
-    VOLNAME=$(diskutil info $line|grep -E "Volume Name:"|sed -e 's;^[[:space:]]*Volume Name:[[:space:]]*;;g'); \
+    VOLNAME=$(diskutil info $line|perl -ne '/Volume Name:\s*(\S.*)\s*$/ and print "$1\n"'); \
     echo "\"$line ($VOLNAME)\""; \
     done
     )
-
 EFI_ARG="$(echo "$EFIs"|awk '{printf " %d %s\n", NR, $0}')"
 CMD="./tools/dialog --title \"Choose EFI partition\" --backtitle \"${BACKTITLE}\" --menu \"Choose EFI partition on your internal drive\" 15 60 5 ${EFI_ARG} --stdout"
 clear
 selected_efi=$(echo "$EFIs"|sed -n $(eval $CMD)p)
-
-if test `expr $(echo -e $EFIs | wc -l) - 1` 1>/dev/null
+test -z "$selected_efi" && selected_efi=$(echo "$EFIs"|sed -n 1p)
+if test `expr $(echo "$EFIs" | wc -l) - 1` 1>/dev/null
 then
     vol=$(echo $selected_efi|perl -ne '/^\"(disk\d+s\d+)/ and print "$1\n"')
     if diskutil info $vol|grep -E "Mounted:\s+Yes" >/dev/null 2>&1
@@ -71,7 +70,9 @@ then
     fi
 fi
 
-clover_path="$(./tools/dialog --title "Verify clover folder" --backtitle "${BACKTITLE}" --inputbox "Is this the correct clover path? If not, modify it." 8 50 "${mount_point}/EFI/CLOVER" --stdout)"
+
+clover_path_new="$(./tools/dialog --title "Verify clover folder" --backtitle "${BACKTITLE}" --inputbox "Is this the correct clover path? If not, modify it." 8 50 "${mount_point}/EFI/CLOVER" --stdout)"
+test -z "$clover_path_new" || clover_path="$clover_path_new"
 clear
 #echo $clover_path
 if test -f ./.git/index && test "$(cat "$clover_path/XPS9350_REV" 2>/dev/null)" != "$(git rev-parse --short HEAD 2>/dev/null)" || test ! -f "$clover_path/XPS9350_REV"
