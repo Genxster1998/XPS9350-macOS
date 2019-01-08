@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export LANG=C
+
 # Bold / Non-bold
 BOLD="\033[1m"
 RED="\033[0;31m"
@@ -11,6 +13,11 @@ OFF="\033[m"
 # Repository location
 REPO=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd ${REPO}
+
+PLISTBUDDY="/usr/libexec/plistbuddy"
+DIALOG="${REPO}/tools/dialog"
+BOOTOPTION="${REPO}/tools/bootoption"
+BACKTITLE="XPS 13 9350 Post-install by maz-1"
 
 array_contains () {
     local array="$1[@]"
@@ -25,14 +32,16 @@ array_contains () {
     return $in
 }
 
-BACKTITLE="XPS 13 9350 Post-install by maz-1"
-
 if [[ $EUID -ne 0 ]];
 then
-    if test -f ./.git/index && test "$(git log --branches --not --remotes)" = ""
+    git_status="$(git status -sb 2>/dev/null|head -1)"
+    local_branch="$(echo "$git_status"|perl -ne '/^##\s+(\S+)\.\.\./ and print "$1\n"')"
+    remote_alias="$(echo "$git_status"|perl -ne '/^##\s+\S+\.\.\.(\S+)\/[^\s\/]+\s/ and print "$1\n"')"
+    remote_branch="$(echo "$git_status"|perl -ne '/^##\s+\S+\.\.\.\S+\/([^\s\/]+)\s/ and print "$1\n"')"
+    if test -f ./.git/index && test "$(git log ${local_branch} --not ${remote_alias}/${remote_branch})" = ""
     then
         echo -e "${GREEN}[GIT]${OFF}: Updating local data to latest version"
-        git pull
+        git pull ${remote_alias} ${remote_branch}
     fi
     exec sudo /bin/bash "$0" "$@"
     exit 0
@@ -45,7 +54,7 @@ EFIs=$(diskutil list|perl -ne '/^\s+\d+:\s+EFI\s+.*(disk\S+)\s*$/ and print "$1\
     done
     )
 EFI_ARG="$(echo "$EFIs"|awk '{printf " %d %s\n", NR, $0}')"
-CMD="./tools/dialog --title \"Choose EFI partition\" --backtitle \"${BACKTITLE}\" --menu \"Choose EFI partition on your internal drive\" 15 60 5 ${EFI_ARG} --stdout"
+CMD="${DIALOG} --title \"Choose EFI partition\" --backtitle \"${BACKTITLE}\" --menu \"Choose EFI partition on your internal drive\" 15 60 5 ${EFI_ARG} --stdout"
 clear
 selected_efi=$(echo "$EFIs"|sed -n $(eval $CMD)p)
 test -z "$selected_efi" && selected_efi=$(echo "$EFIs"|sed -n 1p)
@@ -66,12 +75,12 @@ then
             mount_point="/Volumes/${vol_label// /_}"
         fi
         mkdir ${mount_point}
-        mount -t msdos /dev/$vol ${mount_point} || ./tools/dialog --title 'Error!' --backtitle "${BACKTITLE}" --msgbox "Cannot mount specified EFI partition" 6 50 --stdout
+        mount -t msdos /dev/$vol ${mount_point} || ${DIALOG} --title 'Error!' --backtitle "${BACKTITLE}" --msgbox "Cannot mount specified EFI partition" 6 50 --stdout
     fi
 fi
 
 
-clover_path_new="$(./tools/dialog --title "Verify clover folder" --backtitle "${BACKTITLE}" --inputbox "Is this the correct clover path? If not, modify it." 8 50 "${mount_point}/EFI/CLOVER" --stdout)"
+clover_path_new="$(${DIALOG} --title "Verify clover folder" --backtitle "${BACKTITLE}" --inputbox "Is this the correct clover path? If not, modify it." 8 50 "${mount_point}/EFI/CLOVER" --stdout)"
 test -z "$clover_path_new" || clover_path="$clover_path_new"
 clear
 #echo $clover_path
@@ -94,12 +103,12 @@ then
     fi
     
     for i in ACPI Boot BootGraphics CPU Devices Graphics KernelAndKextPatches SystemParameters; do
-        /usr/libexec/plistbuddy -c "Delete ':$i'" "$clover_path/../config.plist" 2>/dev/null
+        ${PLISTBUDDY} -c "Delete ':$i'" "$clover_path/../config.plist" 2>/dev/null
     done
     
-    if [ `/usr/libexec/plistbuddy -c "Print :SMBIOS:SerialNumber" "$clover_path/../config.plist"` != 'FAKESERIAL' ]
+    if [ `${PLISTBUDDY} -c "Print :SMBIOS:SerialNumber" "$clover_path/../config.plist"` != 'FAKESERIAL' ]
     then
-        ./tools/dialog --title "Warning" --backtitle "${BACKTITLE}" --yesno "Preserve existing SMBIOS settings?" 6 60 --stdout || smbios_db="1"
+        ${DIALOG} --title "Warning" --backtitle "${BACKTITLE}" --yesno "Preserve existing SMBIOS settings?" 6 60 --stdout || smbios_db="1"
         clear
     else
         smbios_db="1"
@@ -107,36 +116,31 @@ then
     if test "$smbios_db" = "1" 
     then
         gProductArr=['MacBookPro13,2','MacBookPro13,1','MacBook9,1']
-        gProductName=`/usr/libexec/plistbuddy -c "Print ':SMBIOS:ProductName'" "$clover_path/../config.plist"`
+        gProductName=`${PLISTBUDDY} -c "Print ':SMBIOS:ProductName'" "$clover_path/../config.plist"`
         array_contains gProductArr "${gProductName}" || gProductName="MacBookPro13,2"
         gGenerateSerialAndMLB=`"${REPO}"/tools/macserial "${gProductName}" -n 1`
         gGenerateSerial=`echo ${gGenerateSerialAndMLB}|grep -oE '^\S+'`
         gGenerateMLB=`echo ${gGenerateSerialAndMLB}|grep -oE '\S+$'`
         gGenerateUUID=$(uuidgen)
-        /usr/libexec/plistbuddy -c "Delete ':RtVariables:MLB'" "$clover_path/../config.plist" 2>/dev/null
-        /usr/libexec/plistbuddy -c "Add ':RtVariables:MLB' string" "$clover_path/../config.plist"
-        /usr/libexec/plistbuddy -c "Set ':RtVariables:MLB' ${gGenerateMLB}" "$clover_path/../config.plist"
+        ${PLISTBUDDY} -c "Add ':RtVariables:MLB' string" "$clover_path/../config.plist" 2>/dev/null
+        ${PLISTBUDDY} -c "Set ':RtVariables:MLB' ${gGenerateMLB}" "$clover_path/../config.plist"
         
-        /usr/libexec/plistbuddy -c "Delete ':RtVariables:ROM'" "$clover_path/../config.plist" 2>/dev/null
-        /usr/libexec/plistbuddy -c "Add ':RtVariables:ROM' string" "$clover_path/../config.plist"
-        /usr/libexec/plistbuddy -c "Set ':RtVariables:ROM' UseMacAddr0" "$clover_path/../config.plist"
+        ${PLISTBUDDY} -c "Add ':RtVariables:ROM' string" "$clover_path/../config.plist" 2>/dev/null
+        ${PLISTBUDDY} -c "Set ':RtVariables:ROM' UseMacAddr0" "$clover_path/../config.plist"
         
-        /usr/libexec/plistbuddy -c "Delete ':SMBIOS:SerialNumber'" "$clover_path/../config.plist" 2>/dev/null
-        /usr/libexec/plistbuddy -c "Add ':SMBIOS:SerialNumber' string" "$clover_path/../config.plist"
-        /usr/libexec/plistbuddy -c "Set ':SMBIOS:SerialNumber' ${gGenerateSerial}" "$clover_path/../config.plist"
+        ${PLISTBUDDY} -c "Add ':SMBIOS:SerialNumber' string" "$clover_path/../config.plist" 2>/dev/null
+        ${PLISTBUDDY} -c "Set ':SMBIOS:SerialNumber' ${gGenerateSerial}" "$clover_path/../config.plist"
         
-        /usr/libexec/plistbuddy -c "Delete ':SMBIOS:BoardSerialNumber'" "$clover_path/../config.plist" 2>/dev/null
-        /usr/libexec/plistbuddy -c "Add ':SMBIOS:BoardSerialNumber' string" "$clover_path/../config.plist"
-        /usr/libexec/plistbuddy -c "Set ':SMBIOS:BoardSerialNumber' ${gGenerateMLB}" "$clover_path/../config.plist"
+        ${PLISTBUDDY} -c "Add ':SMBIOS:BoardSerialNumber' string" "$clover_path/../config.plist" 2>/dev/null
+        ${PLISTBUDDY} -c "Set ':SMBIOS:BoardSerialNumber' ${gGenerateMLB}" "$clover_path/../config.plist"
         
-        /usr/libexec/plistbuddy -c "Delete ':SMBIOS:SmUUID'" "$clover_path/../config.plist" 2>/dev/null
-        /usr/libexec/plistbuddy -c "Add ':SMBIOS:SmUUID' string" "$clover_path/../config.plist"
-        /usr/libexec/plistbuddy -c "Set ':SMBIOS:SmUUID' ${gGenerateUUID}" "$clover_path/../config.plist"
+        ${PLISTBUDDY} -c "Add ':SMBIOS:SmUUID' string" "$clover_path/../config.plist" 2>/dev/null
+        ${PLISTBUDDY} -c "Set ':SMBIOS:SmUUID' ${gGenerateUUID}" "$clover_path/../config.plist"
     fi
-    /usr/libexec/plistbuddy -c "Delete ':GUI'" "$clover_path/config.plist" 2>/dev/null
-    /usr/libexec/plistbuddy -c "Delete ':RtVariables'" "$clover_path/config.plist" 2>/dev/null
-    /usr/libexec/plistbuddy -c "Delete ':SMBIOS'" "$clover_path/config.plist" 2>/dev/null
-    /usr/libexec/plistbuddy -c "Merge \"$clover_path/../config.plist\"" "$clover_path/config.plist"
+    ${PLISTBUDDY} -c "Delete ':GUI'" "$clover_path/config.plist" 2>/dev/null
+    ${PLISTBUDDY} -c "Delete ':RtVariables'" "$clover_path/config.plist" 2>/dev/null
+    ${PLISTBUDDY} -c "Delete ':SMBIOS'" "$clover_path/config.plist" 2>/dev/null
+    ${PLISTBUDDY} -c "Merge \"$clover_path/../config.plist\"" "$clover_path/config.plist"
     rm -f "$clover_path/../config.plist"
     #
     # Fix HiDPI boot graphics issue
@@ -148,13 +152,15 @@ then
     gVerticalRez_pr=${gEDID:122:1}
     gVerticalRez_st=${gEDID:118:2}
     gVerticalRez=$((0x$gVerticalRez_pr$gVerticalRez_st))
+    ${PLISTBUDDY} -c "Add ':BootGraphics:EFILoginHiDPI' string" "$clover_path/config.plist" 2>/dev/null
+    ${PLISTBUDDY} -c "Add ':BootGraphics:UIScale' string" "$clover_path/config.plist" 2>/dev/null
     if [[ $gHorizontalRez -gt 1920 || $gSystemHorizontalRez -gt 1920 ]];
     then
-      /usr/libexec/plistbuddy -c "Set :BootGraphics:EFILoginHiDPI 1" "$clover_path/config.plist"
-      /usr/libexec/plistbuddy -c "Set :BootGraphics:UIScale 2" "$clover_path/config.plist"
+      ${PLISTBUDDY} -c "Set :BootGraphics:EFILoginHiDPI 1" "$clover_path/config.plist"
+      ${PLISTBUDDY} -c "Set :BootGraphics:UIScale 2" "$clover_path/config.plist"
     else
-      /usr/libexec/plistbuddy -c "Set :BootGraphics:EFILoginHiDPI 0" "$clover_path/config.plist"
-      /usr/libexec/plistbuddy -c "Set :BootGraphics:UIScale 1" "$clover_path/config.plist"
+      ${PLISTBUDDY} -c "Set :BootGraphics:EFILoginHiDPI 0" "$clover_path/config.plist"
+      ${PLISTBUDDY} -c "Set :BootGraphics:UIScale 1" "$clover_path/config.plist"
     fi
     # install CPUFriend
     gCpuName=$(sysctl machdep.cpu.brand_string |sed -e "/.*) /s///" -e "/ CPU.*/s///")
@@ -171,15 +177,15 @@ then
     rm -f /tmp/entry_exists
     EFI_UUID=$(diskutil info "$(echo $clover_path|sed -e 's|/[Ee][Ff][Ii]/[Cc][Ll][Oo][Vv][Ee][Rr]||g')"|perl -ne '/Partition UUID:\s+(\S{8}-\S{4}-\S{4}-\S{4}-\S{12})/ and print "$1\n"')
     ROOT_UUID=$(diskutil info /|perl -ne '/Partition UUID:\s+(\S{8}-\S{4}-\S{4}-\S{4}-\S{12})/ and print "$1\n"')
-    ./tools/bootoption list|perl -ne '/\s+(\d+|--):\s+(Boot\d+)\s+/ and print "$2\n"'|while read line
+    ${BOOTOPTION} list|perl -ne '/\s+(\d+|--):\s+(Boot\d+)\s+/ and print "$2\n"'|while read line
     do
-        entry_props="$(./tools/bootoption info $line)"
+        entry_props="$(${BOOTOPTION} info $line)"
         entry_uuid=$(echo "$entry_props"|perl -ne '/Partition UUID: (\S{8}-\S{4}-\S{4}-\S{4}-\S{12})/ and print "$1\n"')
         entry_name=$(echo "$entry_props"|perl -ne '/Description:\s+(\S.*\S)\s*$/ and print "$1\n"')
         entry_path=$(echo "$entry_props"|perl -ne '/Loader Path:\s+(\S.*\S)\s*$/ and print "$1\n"')
         if test "$ROOT_UUID" = "$entry_uuid" && test "${entry_name}" = "Mac OS X"
         then
-            ./tools/bootoption delete -n $line
+            ${BOOTOPTION} delete -n $line
         fi
         if [ "$entry_uuid" = "$EFI_UUID" ]
         then
@@ -192,12 +198,12 @@ then
     done
     if test ! -f /tmp/entry_exists
     then
-        ./tools/bootoption create -l "$clover_path/CLOVERX64.efi" -d "CLOVER"
+        ${BOOTOPTION} create -l "$clover_path/CLOVERX64.efi" -d "CLOVER"
     fi
     rm -f /tmp/entry_exists
 fi
 # optional operations
-optional_ops=$(./tools/dialog --checklist "Select optional tweaks" 10 60 4 \
+optional_ops=$(${DIALOG} --checklist "Select optional tweaks" 10 60 4 \
 1 "Enable TRIM support for 3rd party SSD" off \
 2 "Enable 3rd Party application support" off \
 3 "Disable TouchID launch daemons" off \
@@ -224,5 +230,5 @@ echo -e "${BOLD}Installing USBFix...${OFF}"
 echo -e "${BOLD}Installing kexts...${OFF}"
 ./kexts/Library-Extensions/install.sh
 
-./tools/dialog --title "Done" --backtitle "${BACKTITLE}" --msgbox "Done, restart to take effect." 6 60 --stdout
+${DIALOG} --title "Done" --backtitle "${BACKTITLE}" --msgbox "Done, restart to take effect." 6 60 --stdout
 clear
