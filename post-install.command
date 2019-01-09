@@ -38,7 +38,10 @@ then
     local_branch="$(echo "$git_status"|perl -ne '/^##\s+(\S+)\.\.\./ and print "$1\n"')"
     remote_alias="$(echo "$git_status"|perl -ne '/^##\s+\S+\.\.\.(\S+)\/[^\s\/]+\s/ and print "$1\n"')"
     remote_branch="$(echo "$git_status"|perl -ne '/^##\s+\S+\.\.\.\S+\/([^\s\/]+)\s/ and print "$1\n"')"
-    if test -f ./.git/index && test "$(git log ${local_branch} --not ${remote_alias}/${remote_branch})" = ""
+    if test ! -z ${local_branch} && \
+       test ! -z ${remote_alias} && \
+       test ! -z ${remote_branch} && \
+       test "$(git log ${local_branch} --not ${remote_alias}/${remote_branch})" = ""
     then
         echo -e "${GREEN}[GIT]${OFF}: Updating local data to latest version"
         git pull ${remote_alias} ${remote_branch}
