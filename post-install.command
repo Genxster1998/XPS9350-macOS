@@ -87,7 +87,7 @@ clover_path_new="$(${DIALOG} --title "Verify clover folder" --backtitle "${BACKT
 test -z "$clover_path_new" || clover_path="$clover_path_new"
 clear
 #echo $clover_path
-if test -f ./.git/index && test "$(cat "$clover_path/XPS9350_REV" 2>/dev/null)" != "$(git rev-parse --short HEAD 2>/dev/null)" || test ! -f "$clover_path/XPS9350_REV"
+if test "$(cat "$clover_path/XPS9350_REV" 2>/dev/null)" != "$(git rev-parse --short HEAD 2>/dev/null)" || test ! -f "$clover_path/XPS9350_REV" || test ! -f ./.git/index 
 then
     mkdir -p "$clover_path"
     cp -f ./CLOVER/config.plist "$clover_path/../"
@@ -207,10 +207,11 @@ then
     rm -f /tmp/entry_exists
 fi
 # optional operations
-optional_ops=$(${DIALOG} --checklist "Select optional tweaks" 10 60 4 \
+optional_ops=$(${DIALOG} --checklist "Select optional tweaks" 12 70 4 \
 1 "Disable TouchID launch daemons" off \
 2 "Enable 3rd Party application support" off \
 3 "Enable TRIM support for 3rd party SSD (not suggested)" off \
+4 "Enable Thunderbolt force-power on boot (not suggested)" off \
 --stdout)
 clear
 if [[ $optional_ops == *"1"* ]]; then
@@ -223,7 +224,16 @@ if [[ $optional_ops == *"2"* ]]; then
     spctl --master-disable
 fi
 # put trimforce to end
-
+# enable thunderbolt force-power
+if test -f "$clover_path/kexts/Other/IOElectrify.kext/Contents/Info.plist"
+then
+    if [[ $optional_ops == *"4"* ]]; then
+        echo -e "${BOLD}Enabling Thunderbolt force-power on boot...${OFF}"
+        ${PLISTBUDDY} -c "Set :IOKitPersonalities:IOElectrify:IOElectrifyPowerHook 3" "$clover_path/kexts/Other/IOElectrify.kext/Contents/Info.plist"
+    else
+        ${PLISTBUDDY} -c "Set :IOKitPersonalities:IOElectrify:IOElectrifyPowerHook 0" "$clover_path/kexts/Other/IOElectrify.kext/Contents/Info.plist"
+    fi
+fi
 # install kexts & daemons
 echo -e "${BOLD}Installing ComboJack...${OFF}"
 ./kexts/ComboJack_Installer/install.sh

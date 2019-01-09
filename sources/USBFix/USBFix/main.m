@@ -282,10 +282,10 @@ kern_return_t ThunderboltForcePower(bool onoff)
     return IOElectrifyCMD(0, (uint64_t)onoff);
 }
 
-kern_return_t IOElectrifyTogglePowerHook(bool onoff)
+kern_return_t IOElectrifyTogglePowerHook(uint32_t onoff)
 {
     fprintf(stderr, "IOElectrifyTogglePowerHook ");
-    return IOElectrifyCMD(1, (uint64_t)onoff);
+    return IOElectrifyCMD(1, onoff);
 }
 
 unsigned int GetUsbLocation(io_service_t usb)
@@ -949,8 +949,12 @@ int usage()
     "    daemon: start daemon\n"
     "    tbon: turn thunderbolt on\n"
     "    tboff: turn thunderbolt off\n"
-    "    pwrhkon: IOElectrify power hook on\n"
-    "    pwrhkoff: IOElectrify power hook off\n"
+    "    pwrhk <unsigned int>: set IOElectrify power hook\n"
+    "        possible option: \n"
+    "          0x0: disable both hooks\n"
+    "          0x1: enable sleep hook\n"
+    "          0x2: enable wake hook\n"
+    "          0x3: enable both hooks\n"
     "    eject: eject xhc2\n"
     "    probe <unsigned int>: scan rp01 with given option\n"
     "        possible option: \n"
@@ -968,10 +972,16 @@ int main(int argc, const char * argv[]) {
 		return ThunderboltForcePower(true);
 	else if (!strcmp(argv[1], "tboff"))
 		return ThunderboltForcePower(false);
-	else if (!strcmp(argv[1], "pwrhkon"))
-		return IOElectrifyTogglePowerHook(true);
-	else if (!strcmp(argv[1], "pwrhkoff"))
-		return IOElectrifyTogglePowerHook(false);
+	else if (!strcmp(argv[1], "pwrhk"))
+    {
+        if (argc > 2)
+        {
+            char *endptr;
+            return IOElectrifyTogglePowerHook((uint32_t)strtol(argv[2], &endptr, 0));
+        }
+        else
+            return IOElectrifyTogglePowerHook(0);
+    }
 	else if (!strcmp(argv[1], "eject"))
 		return ejectXHC2(true);
 	else if (!strcmp(argv[1], "probe"))
@@ -982,8 +992,7 @@ int main(int argc, const char * argv[]) {
             return rp01Probe((uint32_t)strtol(argv[2], &endptr, 0));
         }
         else
-            return rp01Probe(0);  
-        
+            return rp01Probe(0);
     }
 	else if (!strcmp(argv[argc-1], "daemon"))
 		return startDaemon();

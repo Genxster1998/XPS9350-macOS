@@ -698,7 +698,7 @@
 		<key>Arguments</key>
 		<string>igfxcflbklt=1 brcmfx-country=#a darkwake=0 -cdfon</string>
 		<key>DefaultVolume</key>
-		<string>macOS</string>
+		<string>LastBootedVolume</string>
 		<key>NeverHibernate</key>
 		<true/>
 		<key>NoEarlyProgress</key>
@@ -706,7 +706,7 @@
 		<key>Secure</key>
 		<false/>
 		<key>Timeout</key>
-		<integer>2</integer>
+		<integer>5</integer>
 		<key>XMPDetection</key>
 		<integer>1</integer>
 	</dict>
