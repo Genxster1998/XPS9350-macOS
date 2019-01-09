@@ -108,7 +108,7 @@ then
     
     if [ `${PLISTBUDDY} -c "Print :SMBIOS:SerialNumber" "$clover_path/../config.plist"` != 'FAKESERIAL' ]
     then
-        ${DIALOG} --title "Warning" --backtitle "${BACKTITLE}" --yesno "Preserve existing SMBIOS settings?" 6 60 --stdout || smbios_db="1"
+        ${DIALOG} --title "Warning" --backtitle "${BACKTITLE}" --yesno "Preserve existing SMBIOS settings?" 6 40 --stdout || smbios_db="1"
         clear
     else
         smbios_db="1"
@@ -198,30 +198,29 @@ then
     done
     if test ! -f /tmp/entry_exists
     then
+        ${DIALOG} --title "Attention" --backtitle "${BACKTITLE}" --yesno "Add Clover to UEFI entries?" 6 60 --stdout && \
         ${BOOTOPTION} create -l "$clover_path/CLOVERX64.efi" -d "CLOVER"
     fi
     rm -f /tmp/entry_exists
 fi
 # optional operations
 optional_ops=$(${DIALOG} --checklist "Select optional tweaks" 10 60 4 \
-1 "Enable TRIM support for 3rd party SSD" off \
+1 "Disable TouchID launch daemons" off \
 2 "Enable 3rd Party application support" off \
-3 "Disable TouchID launch daemons" off \
+3 "Enable TRIM support for 3rd party SSD (not suggested)" off \
 --stdout)
 clear
 if [[ $optional_ops == *"1"* ]]; then
-    echo -e "${BOLD}Enabling TRIM support for 3rd party SSD...${OFF}"
-    trimforce enable
+    echo -e "${BOLD}Disabling TouchID launch daemons...${OFF}"
+    launchctl remove -w /System/Library/LaunchDaemons/com.apple.biometrickitd.plist
+    launchctl remove -w /System/Library/LaunchDaemons/com.apple.biokitaggdd.plist
 fi
 if [[ $optional_ops == *"2"* ]]; then
     echo -e "${BOLD}Enabling 3rd Party application support...${OFF}"
     spctl --master-disable
 fi
-if [[ $optional_ops == *"3"* ]]; then
-    echo -e "${BOLD}Disabling TouchID launch daemons...${OFF}"
-    launchctl remove -w /System/Library/LaunchDaemons/com.apple.biometrickitd.plist
-    launchctl remove -w /System/Library/LaunchDaemons/com.apple.biokitaggdd.plist
-fi
+# put trimforce to end
+
 # install kexts & daemons
 echo -e "${BOLD}Installing ComboJack...${OFF}"
 ./kexts/ComboJack_Installer/install.sh
@@ -230,5 +229,13 @@ echo -e "${BOLD}Installing USBFix...${OFF}"
 echo -e "${BOLD}Installing kexts...${OFF}"
 ./kexts/Library-Extensions/install.sh
 
-${DIALOG} --title "Done" --backtitle "${BACKTITLE}" --msgbox "Done, restart to take effect." 6 60 --stdout
+# put trimforce to end
+if [[ $optional_ops == *"3"* ]]; then
+    echo -e "${BOLD}Enabling TRIM support for 3rd party SSD...${OFF}"
+    trimforce enable
+fi
+
+afplay /System/Library/Sounds/Glass.aiff &
+osascript -e "display notification \"Done, restart to take effect.\" with title \"${BACKTITLE}\""
+${DIALOG} --title "Done" --backtitle "${BACKTITLE}" --msgbox "Done, restart to take effect." 6 40 --stdout
 clear
