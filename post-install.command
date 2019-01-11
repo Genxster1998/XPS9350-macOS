@@ -57,7 +57,7 @@ EFIs=$(diskutil list|perl -ne '/^\s+\d+:\s+EFI\s+.*(disk\S+)\s*$/ and print "$1\
     done
     )
 EFI_ARG="$(echo "$EFIs"|awk '{printf " %d %s\n", NR, $0}')"
-CMD="${DIALOG} --title \"Choose EFI partition\" --backtitle \"${BACKTITLE}\" --menu \"Choose EFI partition on your internal drive\" 15 60 5 ${EFI_ARG} --stdout"
+CMD="${DIALOG} --title \"Choose EFI partition\" --backtitle \"${BACKTITLE}\" --menu \"Choose EFI partition on your internal drive\" 15 60 5 ${EFI_ARG} --stdout" || exit 1
 clear
 selected_efi=$(echo "$EFIs"|sed -n $(eval $CMD)p)
 test -z "$selected_efi" && selected_efi=$(echo "$EFIs"|sed -n 1p)
@@ -78,13 +78,17 @@ then
             mount_point="/Volumes/${vol_label// /_}"
         fi
         mkdir ${mount_point}
-        mount -t msdos /dev/$vol ${mount_point} || ${DIALOG} --title 'Error!' --backtitle "${BACKTITLE}" --msgbox "Cannot mount specified EFI partition" 6 50 --stdout
+        if ! mount -t msdos /dev/$vol ${mount_point}
+        then
+            ${DIALOG} --title 'Error!' --backtitle "${BACKTITLE}" --msgbox "Cannot mount specified EFI partition" 6 50 --stdout
+            exit 1
+        fi
     fi
 fi
 
 
-clover_path_new="$(${DIALOG} --title "Verify clover folder" --backtitle "${BACKTITLE}" --inputbox "Is this the correct clover path? If not, modify it." 8 50 "${mount_point}/EFI/CLOVER" --stdout)"
-test -z "$clover_path_new" || clover_path="$clover_path_new"
+clover_path_new="$(${DIALOG} --title "Verify clover folder" --backtitle "${BACKTITLE}" --inputbox "Is this the correct clover path? If not, modify it." 8 50 "${mount_point}/EFI/CLOVER" --stdout)" || exit 1
+test -z "$clover_path_new" || clover_path="$clover_path_new" 
 clear
 #echo $clover_path
 if test "$(cat "$clover_path/XPS9350_REV" 2>/dev/null)" != "$(git rev-parse --short HEAD 2>/dev/null)" || test ! -f "$clover_path/XPS9350_REV" || test ! -f ./.git/index 
