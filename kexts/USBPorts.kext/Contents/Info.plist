@@ -61,7 +61,7 @@
 					<key>HS03</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>3</integer>
 						<key>port</key>
 						<data>
 						AwAAAA==
@@ -106,7 +106,7 @@
 				</dict>
 			</dict>
 			<key>model</key>
-			<string>MacBookPro13,2</string>
+			<string>MacBook9,1</string>
 		</dict>
 		<key>MacBookPro13,1-XHC</key>
 		<dict>
@@ -147,7 +147,7 @@
 					<key>HS03</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>3</integer>
 						<key>port</key>
 						<data>
 						AwAAAA==
@@ -192,7 +192,7 @@
 				</dict>
 			</dict>
 			<key>model</key>
-			<string>MacBookPro13,2</string>
+			<string>MacBookPro13,1</string>
 		</dict>
 		<key>MacBookPro13,2-XHC</key>
 		<dict>
@@ -233,7 +233,7 @@
 					<key>HS03</key>
 					<dict>
 						<key>UsbConnector</key>
-						<integer>255</integer>
+						<integer>3</integer>
 						<key>port</key>
 						<data>
 						AwAAAA==

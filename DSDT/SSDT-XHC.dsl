@@ -105,7 +105,8 @@ DefinitionBlock ("", "SSDT", 2, "hack", "XHC", 0x00000000)
                     Package (0x04)
                     {
                         "UsbConnector", 
-                        0xFF, 
+                        //0xFF,
+                        0x03, 
                         "port", 
                         Buffer (0x04)
                         {

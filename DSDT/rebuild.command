@@ -12,9 +12,9 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 echo "${GREEN}[DSDT]${OFF}: Compiling  DSDT / SSDT hotpatches in ./DSDT"
 
+rm -f ../CLOVER/ACPI/patched/*.aml
 for f in ./*.dsl
 do
-    rm -f ../CLOVER/ACPI/patched/*.aml
 	echo "${BLUE}$(basename $f)${OFF}: Compiling to ../CLOVER/ACPI/patched"
 	../tools/iasl -vr -w1 -ve -p ../CLOVER/ACPI/patched/$(basename -s .dsl $f).aml $f
 done
