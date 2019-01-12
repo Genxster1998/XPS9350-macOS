@@ -9,7 +9,7 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 # Clean legacy stuff
 #
-
+echo "Cleaning legacy stuff..."
 sudo rm -f /usr/local/sbin/sleepwatcher
 sudo launchctl unload /Library/LaunchDaemons/com.syscl.externalfix.sleepwatcher.plist 2>/dev/null
 sudo rm -f /Library/LaunchDaemons/com.syscl.externalfix.sleepwatcher.plist
@@ -22,6 +22,7 @@ sudo launchctl unload /Library/LaunchDaemons/com.maz1.USBFix.plist 2>/dev/null
 sudo rm -f /Library/LaunchDaemons/com.maz1.USBFix.plist
 
 # install 
+echo "Installing USBFix..."
 mkdir -p /usr/local/sbin
 sudo cp USBFix /usr/local/sbin
 sudo chmod 755 /usr/local/sbin/USBFix
