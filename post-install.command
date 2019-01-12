@@ -161,13 +161,22 @@ then
     gVerticalRez=$((0x$gVerticalRez_pr$gVerticalRez_st))
     ${PLISTBUDDY} -c "Add ':BootGraphics:EFILoginHiDPI' string" "$clover_path/config.plist" 2>/dev/null
     ${PLISTBUDDY} -c "Add ':BootGraphics:UIScale' string" "$clover_path/config.plist" 2>/dev/null
+    current_theme=`${PLISTBUDDY} -c "Print :GUI:Theme" "$clover_path/config.plist"`
     if [[ $gHorizontalRez -gt 1920 || $gSystemHorizontalRez -gt 1920 ]];
     then
       ${PLISTBUDDY} -c "Set :BootGraphics:EFILoginHiDPI 1" "$clover_path/config.plist"
       ${PLISTBUDDY} -c "Set :BootGraphics:UIScale 2" "$clover_path/config.plist"
+      if test -d "$clover_path/themes/${current_theme}256"
+      then
+          ${PLISTBUDDY} -c "Set :GUI:Theme \"${current_theme}256\"" "$clover_path/config.plist"
+      fi
     else
       ${PLISTBUDDY} -c "Set :BootGraphics:EFILoginHiDPI 0" "$clover_path/config.plist"
       ${PLISTBUDDY} -c "Set :BootGraphics:UIScale 1" "$clover_path/config.plist"
+      if ! test -z "${current_theme%256*}" && test -d "$clover_path/themes/${current_theme%256*}"
+      then
+          ${PLISTBUDDY} -c "Set :GUI:Theme \"${current_theme%256*}\"" "$clover_path/config.plist"
+      fi
     fi
     # install CPUFriend
     gCpuName=$(sysctl machdep.cpu.brand_string |sed -e "/.*) /s///" -e "/ CPU.*/s///")
@@ -214,7 +223,7 @@ fi
 optional_ops=$(${DIALOG} --checklist "Select optional tweaks" 12 70 4 \
 1 "Disable TouchID launch daemons" off \
 2 "Enable 3rd Party application support" off \
-3 "Enable TRIM support for 3rd party SSD (not suggested)" off \
+3 "Force TRIM support on 3rd party SSD (not suggested)" off \
 4 "Enable Thunderbolt force-power on boot (not suggested)" off \
 --stdout)
 clear
