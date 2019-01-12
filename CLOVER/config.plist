@@ -930,7 +930,7 @@
 		<key>BooterConfig</key>
 		<string>0x2A</string>
 		<key>CsrActiveConfig</key>
-		<string>0x03</string>
+		<string>0x167</string>
 		<key>ROM</key>
 		<string>UseMacAddr0</string>
 	</dict>
