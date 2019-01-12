@@ -90,7 +90,19 @@ fi
 clover_path_new="$(${DIALOG} --title "Verify clover folder" --backtitle "${BACKTITLE}" --inputbox "Is this the correct clover path? If not, modify it." 8 50 "${mount_point}/EFI/CLOVER" --stdout)" || exit 1
 test -z "$clover_path_new" || clover_path="$clover_path_new" 
 clear
-#echo $clover_path
+# echo $clover_path
+# get primary display info
+gIOREG="$(ioreg -w0 -c AppleBacklightDisplay)"
+gEDID=$(echo "${gIOREG}"|grep -i "IODisplayEDID"|head -1|sed -e 's/.*<//' -e 's/>//')
+gDisplayVendorID=$(printf "%x\n" $(echo "${gIOREG}"|perl -ne '/"DisplayVendorID" = (\d+)/ and print "$1\n"'|head -1))
+gDisplayProductID=$(printf "%x\n" $(echo "${gIOREG}"|perl -ne '/"DisplayProductID" = (\d+)/ and print "$1\n"'|head -1))
+gHorizontalRez_pr=${gEDID:116:1}
+gHorizontalRez_st=${gEDID:112:2}
+gHorizontalRez=$((0x$gHorizontalRez_pr$gHorizontalRez_st))
+gVerticalRez_pr=${gEDID:122:1}
+gVerticalRez_st=${gEDID:118:2}
+gVerticalRez=$((0x$gVerticalRez_pr$gVerticalRez_st))
+
 if test "$(cat "$clover_path/XPS9350_REV" 2>/dev/null)" != "$(git rev-parse --short HEAD 2>/dev/null)" || test ! -f "$clover_path/XPS9350_REV" || test ! -f ./.git/index 
 then
     mkdir -p "$clover_path"
@@ -152,13 +164,6 @@ then
     #
     # Fix HiDPI boot graphics issue
     #
-    gEDID=$(ioreg -lw0 | grep -i "IODisplayEDID" | sed -e 's/.*<//' -e 's/>//')
-    gHorizontalRez_pr=${gEDID:116:1}
-    gHorizontalRez_st=${gEDID:112:2}
-    gHorizontalRez=$((0x$gHorizontalRez_pr$gHorizontalRez_st))
-    gVerticalRez_pr=${gEDID:122:1}
-    gVerticalRez_st=${gEDID:118:2}
-    gVerticalRez=$((0x$gVerticalRez_pr$gVerticalRez_st))
     ${PLISTBUDDY} -c "Add ':BootGraphics:EFILoginHiDPI' string" "$clover_path/config.plist" 2>/dev/null
     ${PLISTBUDDY} -c "Add ':BootGraphics:UIScale' string" "$clover_path/config.plist" 2>/dev/null
     current_theme=`${PLISTBUDDY} -c "Print :GUI:Theme" "$clover_path/config.plist"`
@@ -246,6 +251,21 @@ then
     else
         ${PLISTBUDDY} -c "Set :IOKitPersonalities:IOElectrify:IOElectrifyPowerHook 0" "$clover_path/kexts/Other/IOElectrify.kext/Contents/Info.plist"
     fi
+fi
+# install display profiles
+echo -e "${BOLD}Installing display profiles...${OFF}"
+if test -f ./Displays/DisplayVendorID-${gDisplayVendorID}/DisplayProductID-${gDisplayProductID}
+then
+    echo "Installing resolution profile for VendorID 0x${gDisplayVendorID} & ProductID 0x${gDisplayProductID}..."
+    mkdir -p /System/Library/Displays/Contents/Resources/Overrides/DisplayVendorID-${gDisplayVendorID}/
+    cp -f  ./Displays/DisplayVendorID-${gDisplayVendorID}/DisplayProductID-${gDisplayProductID} \
+            /System/Library/Displays/Contents/Resources/Overrides/DisplayVendorID-${gDisplayVendorID}/
+    chmod 644 /System/Library/Displays/Contents/Resources/Overrides/DisplayVendorID-${gDisplayVendorID}/DisplayProductID-${gDisplayProductID}
+fi
+if test "${gDisplayVendorID}" = "4d10" && test "${gDisplayProductID}" = "144a"
+then
+    echo "Installing color profile RXN49_LQ133Z1_01.icm..."
+    cp -f ./Displays/QHD+/RXN49_LQ133Z1_01.icm /Library/ColorSync/Profiles/
 fi
 # install kexts & daemons
 echo -e "${BOLD}Installing ComboJack...${OFF}"
