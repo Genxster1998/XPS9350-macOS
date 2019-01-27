@@ -2,8 +2,8 @@
 DefinitionBlock ("", "SSDT", 1, "syscl", "ARPT", 0x00003000)
 {
     External (_SB_.PCI0.RP05, DeviceObj)
-    External (_SB_.PCI0.RP05.PXSX, DeviceObj)
-    External (PXSX, DeviceObj)
+    //External (_SB_.PCI0.RP05.PXSX, DeviceObj)
+    External (_SB_.PCI0.RP05.ARPT, DeviceObj)
     External (DTGP, MethodObj)
 
     Scope (\_SB.PCI0.RP05)
@@ -59,13 +59,15 @@ DefinitionBlock ("", "SSDT", 1, "syscl", "ARPT", 0x00003000)
                 DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))
                 Return (Local0)
         }
-        
+        /*
         Scope (PXSX)
         {
             Name (_STA, Zero)  // _STA: Status
         }
-
+        
         Device (ARPT)
+        */
+        Scope (ARPT)
         {
             Name (_ADR, Zero)  // _ADR: Address
             /*
