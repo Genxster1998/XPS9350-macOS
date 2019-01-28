@@ -149,7 +149,12 @@ then
     then
         gProductArr=['MacBookPro13,2','MacBookPro13,1','MacBook9,1']
         gProductName=`${doCommands[1]} "Print ':SMBIOS:ProductName'" "$clover_path/../config.plist"`
-        array_contains gProductArr "${gProductName}" || gProductName="MacBookPro13,2"
+        if ! array_contains gProductArr "${gProductName}"
+        then
+            gProductName="MacBookPro13,2"
+            ${doCommands[1]} "Add ':SMBIOS:ProductName' string" "$clover_path/../config.plist" 2>/dev/null
+            ${doCommands[1]} "Set ':SMBIOS:ProductName' ${gProductName}" "$clover_path/../config.plist"
+        fi
         gGenerateSerialAndMLB=`"${REPO}"/tools/macserial "${gProductName}" -n 1`
         gGenerateSerial=`echo ${gGenerateSerialAndMLB}|grep -oE '^\S+'`
         gGenerateMLB=`echo ${gGenerateSerialAndMLB}|grep -oE '\S+$'`
