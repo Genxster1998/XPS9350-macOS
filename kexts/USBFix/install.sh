@@ -28,6 +28,7 @@ sudo cp USBFix /usr/local/sbin
 sudo chmod 755 /usr/local/sbin/USBFix
 sudo chown root:wheel /usr/local/sbin/USBFix
 sudo chmod u+s /usr/local/sbin/USBFix
+sudo spctl --add /usr/local/sbin/USBFix
 
 sudo cp com.maz1.USBFix.plist /Library/LaunchDaemons/
 sudo chmod 644 /Library/LaunchDaemons/com.maz1.USBFix.plist
