@@ -35,7 +35,7 @@
 				<key>USB Product Name</key>
 				<string>FaceTime HD Camera</string>
 				<key>USB Serial Number</key>
-				<string>CC26403K8GPGJJM1K</string>
+				<string>CN0Y2TKG7248751OA33MA00</string>
 				<key>USB Vendor Name</key>
 				<string>Apple Inc.</string>
 				<key>bcdDevice</key>
@@ -47,7 +47,7 @@
 				<key>iSerialNumber</key>
 				<integer>3</integer>
 				<key>idProduct</key>
-				<integer>34304</integer>
+				<integer>34064</integer>
 				<key>idVendor</key>
 				<integer>1452</integer>
 				<key>kSuspendPort</key>
@@ -73,7 +73,7 @@
 				<key>USB Product Name</key>
 				<string>FaceTime HD Camera</string>
 				<key>USB Serial Number</key>
-				<string>CC26403K8GPGJJM1K</string>
+				<string>CN0Y2TKG7248751OA33MA00</string>
 				<key>USB Vendor Name</key>
 				<string>Apple Inc.</string>
 				<key>bcdDevice</key>
@@ -85,7 +85,7 @@
 				<key>iSerialNumber</key>
 				<integer>3</integer>
 				<key>idProduct</key>
-				<integer>34304</integer>
+				<integer>34064</integer>
 				<key>idVendor</key>
 				<integer>1452</integer>
 				<key>kSuspendPort</key>
