@@ -15,8 +15,7 @@ This repository contains a sample configuration to run macOS (Currently Mojave S
     - Bluetooth device ID [`0a5c:6410`], chipset `20703A1` with firmware `v5 c4518` using `BrcmPatchRAM2.kext`
     - DW1830 has three ipex4 connectors, but xps 13 only has two antennas. In this case you should connect j0+j1 or j1+j2, because j1 is the antenna for both wlan and bluetooth.
   - Webcam, device ID [`05ac:8600`], works out of the box
-  - Disabled devices
-    - SD card reader (RTS525A), [macOS open-source project](https://github.com/syscl/Sinetek-rtsx)
+  - SD card reader (RTS525A), [macOS open-source project](https://github.com/syscl/Sinetek-rtsx)
 
 - Firmware Revisions
   - BIOS version `1.9.0`
@@ -86,7 +85,7 @@ It is a known bug that usb disks get ejected unexpectedly upon sleep/wake, run `
 
 ## Thunderbolt
 
-It should work, although there is probably no hotplug/sleep support.
+It works, although there is no hotplug/sleep support (**will cause panic**).
 
 ## CPU Profile
 

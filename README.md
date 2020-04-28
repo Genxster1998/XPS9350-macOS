@@ -12,7 +12,7 @@ This repository contains a sample configuration to run macOS (Currently Mojave S
   - Wi-Fi device ID [`14e4:43ba`]
   - Bluetooth device ID [`0a5c:6410`], chipset `20703A1`
 - Webcam, device ID [`05ac:8600`]
-- RTS525A SD card reader (Disabled)
+- RTS525A SD card reader
 - BIOS version `1.9.0`
 
 
@@ -26,7 +26,6 @@ This repository contains a sample configuration to run macOS (Currently Mojave S
 * Change BIOS settings to the following
   - Disable Secure Boot
   - Set SATA Operation to AHCI
-  - Disable card reader if you want to save some battery
 * Boot the installer disk and install.
 * Boot installed OS and run `XPS9350-macOS\post-install.command`, follow its guidance until post-installation is done.
 
