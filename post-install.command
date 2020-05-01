@@ -242,12 +242,35 @@ then
     fi
     rm -f /tmp/entry_exists
 fi
+# get wireless card
+#  PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0)
+# IOService:/AppleACPIPlatformExpert/PCI0@0/AppleACPIPCI/RP05@1C,4/IOPP/ARPT@0
+HAS_DW1820A="off"
+wlan_device_id=$(ioreg -p IODeviceTree -n ARPT@0 -r | grep '"device-id"' | grep -oE "[0-9a-f]{8}")
+wlan_vendor_id=$(ioreg -p IODeviceTree -n ARPT@0 -r | grep '"vendor-id"' | grep -oE "[0-9a-f]{8}")
+wlan_subdevice_id=$(ioreg -p IODeviceTree -n ARPT@0 -r | grep '"subsystem-id"' | grep -oE "[0-9a-f]{8}")
+wlan_subvendor_id=$(ioreg -p IODeviceTree -n ARPT@0 -r | grep '"subsystem-vendor-id"' | grep -oE "[0-9a-f]{8}")
+
+if [[ $wlan_device_id == "a3430000" && $wlan_vendor_id == "e4140000" ]]; then
+    if [[ $wlan_subvendor_id == "6b100000" || $wlan_subvendor_id == "28100000" ]]; then
+        if [[ $wlan_subdevice_id == "21000000" || $wlan_subdevice_id == "22000000" || $wlan_subdevice_id == "23000000" || $wlan_subdevice_id == "5a070000" ]]; then
+            echo -e "${BOLD}DW1820A detected!${OFF}"
+            HAS_DW1820A="on"
+        fi
+    fi
+fi
+#if [ -z $wlan_device_id ] && [ -z $wlan_device_id ]; then
+#    echo -e "${BOLD}No WLAN device found!${OFF}"
+#    HAS_DW1820A="on"
+#fi
+
 # optional operations
-optional_ops=$(${doCommands[0]} --checklist "Select optional tweaks" 12 70 4 \
+optional_ops=$(${doCommands[0]} --checklist "Select optional tweaks" 12 70 5 \
 1 "Disable TouchID launch daemons" off \
-2 "Enable 3rd Party application support" off \
-3 "Force TRIM support on 3rd party SSD (not suggested)" off \
-4 "Enable Thunderbolt force-power on boot (not suggested)" off \
+2 "Inject device properties for DW1820A WLAN" ${HAS_DW1820A} \
+3 "Enable 3rd Party application support" off \
+4 "Force TRIM support on 3rd party SSD (not suggested)" off \
+5 "Enable Thunderbolt force-power on boot (not suggested)" off \
 --stdout)
 clear
 if [[ $optional_ops == *"1"* ]]; then
@@ -256,6 +279,29 @@ if [[ $optional_ops == *"1"* ]]; then
     launchctl remove -w /System/Library/LaunchDaemons/com.apple.biokitaggdd.plist
 fi
 if [[ $optional_ops == *"2"* ]]; then
+    echo -e "${BOLD}Injecting device properties for DW1820A WLAN...${OFF}"
+    ${doCommands[1]} "Add ':Devices:Properties' dict" "$clover_path/config.plist" 2>/dev/null
+    ${doCommands[1]} "Add ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0)' dict" "$clover_path/config.plist" 2>/dev/null
+    
+    ${doCommands[1]} "Add ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):AAPL,slot-name' string" "$clover_path/config.plist" 2>/dev/null
+    ${doCommands[1]} "Set ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):AAPL,slot-name' WLAN" "$clover_path/config.plist"
+    
+    ${doCommands[1]} "Add ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):compatible' string" "$clover_path/config.plist" 2>/dev/null
+    ${doCommands[1]} "Set ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):compatible' pci14e4,4331" "$clover_path/config.plist"
+    
+    ${doCommands[1]} "Add ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):device_type' string" "$clover_path/config.plist" 2>/dev/null
+    ${doCommands[1]} "Set ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):device_type' \"Airport Extreme\"" "$clover_path/config.plist"
+    
+    ${doCommands[1]} "Add ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):model' string" "$clover_path/config.plist" 2>/dev/null
+    ${doCommands[1]} "Set ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):model' \"DW1820A (BCM4350) 802.11ac Wireless\"" "$clover_path/config.plist"
+    
+    ${doCommands[1]} "Add ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):name' string" "$clover_path/config.plist" 2>/dev/null
+    ${doCommands[1]} "Set ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):name' Airport" "$clover_path/config.plist"
+    
+    ${doCommands[1]} "Add ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):pci-aspm-default' integer" "$clover_path/config.plist" 2>/dev/null
+    ${doCommands[1]} "Set ':Devices:Properties:PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0):pci-aspm-default' 0" "$clover_path/config.plist"
+fi
+if [[ $optional_ops == *"3"* ]]; then
     echo -e "${BOLD}Enabling 3rd Party application support...${OFF}"
     spctl --master-disable
 fi
@@ -263,7 +309,7 @@ fi
 # enable thunderbolt force-power
 if test -f "$clover_path/kexts/Other/IOElectrify.kext/Contents/Info.plist"
 then
-    if [[ $optional_ops == *"4"* ]]; then
+    if [[ $optional_ops == *"5"* ]]; then
         echo -e "${BOLD}Enabling Thunderbolt force-power on boot...${OFF}"
         ${doCommands[1]} "Set :IOKitPersonalities:IOElectrify:IOElectrifyPowerHook 3" "$clover_path/kexts/Other/IOElectrify.kext/Contents/Info.plist"
     else
@@ -294,7 +340,7 @@ echo -e "${BOLD}Installing kexts...${OFF}"
 ./kexts/Library-Extensions/install.sh
 
 # put trimforce to end
-if [[ $optional_ops == *"3"* ]]; then
+if [[ $optional_ops == *"4"* ]]; then
     echo -e "${BOLD}Enabling TRIM support for 3rd party SSD...${OFF}"
     trimforce enable
 fi

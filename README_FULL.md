@@ -66,7 +66,9 @@ After boot into installed Mac OS, use `tools/Clover Configurator.app` to tweak c
 
 <del>Put `FakePCIID_Broadcom_WiFi.kext` and `FakePCIID.kext` in `Clover/kexts/Other` if you have non-working broadcom wlan device described here: [OS-X-Fake-PCI-ID](https://github.com/rehabman/OS-X-Fake-PCI-ID/tree/master).</del> `AirportBrcmFixup` should be able to do all the job.
 
-To fix DW1830/DW1560 bluetooth support, run `kexts/Library-Extensions/install.sh` to install `BrcmFirmwareRepo.kext` and `BrcmPatchRAM2.kext` to `/Library/Extensions/`
+You may fail to boot with stock DW1820A enabled, disable it during installation. After installation, follow [this tutorial](https://blog.daliansky.net/DW1820A_BCM94350ZAE-driver-inserts-the-correct-posture.html) to re-enable it.
+
+To fix DW1820A/DW1830/DW1560 bluetooth support, run `kexts/Library-Extensions/install.sh` to install `BrcmFirmwareRepo.kext` and `BrcmPatchRAM2.kext` to `/Library/Extensions/`
 
 ## Audio
 

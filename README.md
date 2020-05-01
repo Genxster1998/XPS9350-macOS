@@ -8,7 +8,10 @@ This repository contains a sample configuration to run macOS (Currently Mojave S
 - 8GB RAM
 - Sharp `SHP144` `LQ133Z1` QHD+ (3200x1800) Touchscreen display
 - [PLEXTOR 512GB SSD](http://www.goplextor.com/Product/Detail/M6G-2280) (PLEXTOR PX-512M6G-2280) on latest firmware
-- Dell DW1830 Wireless
+- Dell DW1820A Wireless (Stock)
+  - Wi-Fi device ID [`14e4:2100`]
+  - Bluetooth device ID [`0a5c:6412`]
+- Dell DW1830 Wireless (Alternative)
   - Wi-Fi device ID [`14e4:43ba`]
   - Bluetooth device ID [`0a5c:6410`], chipset `20703A1`
 - Webcam, device ID [`05ac:8600`]
@@ -26,8 +29,9 @@ This repository contains a sample configuration to run macOS (Currently Mojave S
 * Change BIOS settings to the following
   - Disable Secure Boot
   - Set SATA Operation to AHCI
+  - If you have DW1820A WLAN and can't boot with it enabled, disable it temporarily.
 * Boot the installer disk and install.
-* Boot installed OS and run `XPS9350-macOS\post-install.command`, follow its guidance until post-installation is done.
+* Boot installed OS and run `XPS9350-macOS\post-install.command`, follow its guidance until post-installation is done.(**If you disabled DW1820A previously, enable "Inject device properties for DW1820A WLAN" option and re-enable DW1820A in bios when reboot**)
 
 For a detailed installation description see [README_FULL.md](https://github.com/hackintosh-stuff/XPS9350-macOS/blob/master/README_FULL.md)
 
